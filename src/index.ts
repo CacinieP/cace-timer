@@ -281,9 +281,10 @@ async function cmdStop(): Promise<void> {
   const durationMinutes = duration / 60000;
 
   // Calculate efficiency score
-  let efficiency = 100;
-  if (session.estimatedMinutes && session.estimatedMinutes > 0) {
-    efficiency = Math.min(100, Math.round((session.estimatedMinutes / durationMinutes) * 100));
+  const hasEstimate = session.estimatedMinutes && session.estimatedMinutes > 0;
+  let efficiency = -1;
+  if (hasEstimate) {
+    efficiency = Math.min(100, Math.round((session.estimatedMinutes! / durationMinutes) * 100));
   }
 
   data.history.unshift(session);
@@ -307,19 +308,22 @@ async function cmdStop(): Promise<void> {
   }
 
   // Efficiency display
-  let effEmoji = '⭐';
-  let effColor = '\x1b[32m';
-  if (efficiency < 50) {
-    effEmoji = '💀';
-    effColor = '\x1b[31m';
-  } else if (efficiency < 80) {
-    effEmoji = '💪';
-    effColor = '\x1b[33m';
-  } else if (efficiency >= 100) {
-    effEmoji = '🏆';
+  if (hasEstimate) {
+    let effEmoji = '⭐';
+    let effColor = '\x1b[32m';
+    if (efficiency < 50) {
+      effEmoji = '💀';
+      effColor = '\x1b[31m';
+    } else if (efficiency < 80) {
+      effEmoji = '💪';
+      effColor = '\x1b[33m';
+    } else if (efficiency >= 100) {
+      effEmoji = '🏆';
+    }
+    console.log(`  ${effEmoji} 效率分: ${effColor}${efficiency}%\x1b[0m`);
+  } else {
+    console.log('  ⏱  未设置预估时长，无法计算效率分');
   }
-
-  console.log(`  ${effEmoji} 效率分: ${effColor}${efficiency}%\x1b[0m`);
   console.log();
 }
 
@@ -373,7 +377,7 @@ function cmdList(options: { today?: boolean; tag?: string; limit?: number }): vo
   }
 
   // Limit
-  const limit = options.limit || 10;
+  const limit = options.limit ?? 10;
   sessions = sessions.slice(0, limit);
 
   console.log();
@@ -536,7 +540,7 @@ async function main(): Promise<void> {
     case 'start':
       await cmdStart(positional[0] || '', {
         tag: options.tag as string,
-        estimate: options.estimate ? parseInt(options.estimate as string) : undefined
+        estimate: options.estimate ? (Number(options.estimate) > 0 ? parseInt(options.estimate as string) : undefined) : undefined
       });
       break;
 

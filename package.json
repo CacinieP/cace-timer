@@ -1,6 +1,6 @@
 {
   "name": "@cacinie/cace-timer",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A minimal time tracking CLI with cute anime girl mascot",
   "main": "dist/index.js",
   "bin": {
@@ -11,10 +11,23 @@
     "build": "tsc",
     "dev": "ts-node src/index.ts",
     "start": "node dist/index.js",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "prepare": "npm run build"
   },
-  "files": ["dist", "README.md", "LICENSE"],
-  "keywords": ["time", "tracker", "cli", "timer", "productivity", "anime", "mascot"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "time",
+    "tracker",
+    "cli",
+    "timer",
+    "productivity",
+    "anime",
+    "mascot"
+  ],
   "author": "CacinieP <cacinie@gmail.com>",
   "license": "MIT",
   "repository": {
@@ -35,5 +48,6 @@
     "@types/node": "^20.10.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.0"
-  }
+  },
+  "types": "dist/index.d.ts"
 }

@@ -67,8 +67,11 @@ Stop current task, show summary and efficiency score.
 | Score | Emoji | Meaning |
 |-------|-------|---------|
 | 100% | 🏆 | Actual ≤ Estimate |
-| 80-99% | 💪 | Slightly over |
+| 80-99% | ⭐ | Slightly over or on target |
+| 50-79% | 💪 | Moderately over estimate |
 | <50% | 💀 | Far over estimate |
+
+Efficiency score is only shown when `--estimate` was set at task start.
 
 ### `tk status`
 
@@ -102,7 +105,13 @@ tk search "登录"
 Set sync file path for cross-device sync (Dropbox / iCloud / OneDrive).
 
 ```bash
+# macOS / Linux
 tk sync ~/Dropbox/cace-timer.json
+tk sync ~/OneDrive/cace-timer.json
+
+# Windows
+tk sync "%USERPROFILE%\Dropbox\cace-timer.json"
+tk sync "%USERPROFILE%\OneDrive\cace-timer.json"
 ```
 
 ### `tk help`
@@ -117,6 +126,7 @@ CACE reacts to what you do:
 |-------|------|-------|------|
 | Normal | ● ● | ─── | Default |
 | Happy | ★ ★ | ◡◡◡ | Task completed |
+| Super Happy | ◉ ◉ | ▽△▽ | Animation frame |
 | Sleepy | ─ ─ | ─── | No active task |
 | Blink | ─ ─ | ─── | Animation frame |
 
@@ -124,7 +134,42 @@ CACE reacts to what you do:
 
 All data is stored in `~/.cace-timer.json`. Single JSON file, easy to backup and sync.
 
+```json
+{
+  "syncPath": "~/Dropbox/cace-timer.json",
+  "current": null,
+  "history": [
+    {
+      "id": "lq3x9k2",
+      "task": "写周报",
+      "start": "2024-03-02T10:00:00.000Z",
+      "end": "2024-03-02T10:30:00.000Z",
+      "tags": ["work"],
+      "marks": [{ "time": "...", "note": "完成数据分析" }],
+      "estimatedMinutes": 30
+    }
+  ]
+}
+```
+
+## Uninstall
+
+```bash
+npm uninstall -g @cacinie/cace-timer
+```
+
 ## Changelog
+
+### v1.1.1
+
+- Added `prepare` script (fixes git-based installs)
+- Added `types` field for TypeScript consumers
+- Fixed efficiency score display when no estimate was set
+- Fixed efficiency score table mismatch in README
+- Fixed `--limit 0` falsy-zero bug
+- Fixed `--estimate` NaN handling
+- Added Super Happy mascot state and Windows sync paths to README
+- Added uninstall instructions and data format to README
 
 ### v1.1.0
 
