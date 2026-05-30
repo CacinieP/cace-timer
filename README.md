@@ -17,6 +17,9 @@ npm install -g @cacinie/cace-timer
 - **Local-first data**: one JSON file at `~/.cace-timer.json`
 - **Portable sync**: point the data file at Dropbox, iCloud, OneDrive, or any synced folder
 - **Estimate feedback**: compare actual time with your planned duration
+- **Statistics**: daily/weekly/monthly reports with ASCII charts
+- **Pomodoro**: built-in pomodoro timer with work/break cycles
+- **Bilingual**: Chinese and English UI with `--lang` flag
 - **No dashboard lock-in**: easy to inspect, back up, or migrate
 
 ```
@@ -33,8 +36,8 @@ npm install -g @cacinie/cace-timer
 ## Quick Start
 
 ```bash
-# Start a task
-tk start "写周报" --tag work --estimate 30
+# Start a task (multi-tag supported!)
+tk start "写周报" --tag work --tag daily --estimate 30
 
 # Mark progress
 tk mark "完成数据分析"
@@ -44,21 +47,28 @@ tk status
 
 # Stop and get efficiency score
 tk stop
+
+# View statistics
+tk summary --today
+tk summary --week --tag work
+
+# Export to CSV
+tk export --format csv --output report.csv
 ```
 
 ## Commands
 
 ### `tk start <task> [options]`
 
-Start a new task.
+Start a new task. Supports multiple tags.
 
 | Option | Description |
 |--------|-------------|
-| `--tag <tag>` | Add a tag |
+| `--tag <tag>` | Add tag(s). Use multiple times or comma-separated: `--tag dev --tag api` or `--tag dev,api` |
 | `--estimate <minutes>` | Estimated duration (for efficiency score) |
 
 ```bash
-tk start "开发登录功能" --tag coding --estimate 60
+tk start "开发登录功能" --tag coding --tag backend --estimate 60
 ```
 
 ### `tk mark <note>`
@@ -80,8 +90,6 @@ Stop current task, show summary and efficiency score.
 | 80-99% | ⭐ | Slightly over or on target |
 | 50-79% | 💪 | Moderately over estimate |
 | <50% | 💀 | Far over estimate |
-
-Efficiency score is only shown when `--estimate` was set at task start.
 
 ### `tk status`
 
@@ -110,6 +118,75 @@ Search across task names, tags, and mark notes.
 tk search "登录"
 ```
 
+### `tk summary [options]`
+
+Statistics report with ASCII bar charts.
+
+| Option | Description |
+|--------|-------------|
+| `--today` | Today only |
+| `--week` | This week |
+| `--month` | This month |
+| `--tag <tag>` | Filter by tag |
+
+Shows: total sessions, total/average duration, tag distribution with bars, daily hours chart (last 7 days), top 5 longest tasks.
+
+```bash
+tk summary --today
+tk summary --week --tag coding
+tk summary --month
+```
+
+### `tk delete <id | --last>`
+
+Delete a session from history.
+
+```bash
+tk delete --last          # Delete most recent record
+tk delete lq3x9k2         # Delete by ID
+```
+
+### `tk resume <id | --last>`
+
+Resume a completed task as a new session (copies task name and tags).
+
+```bash
+tk resume --last          # Resume most recent task
+tk resume lq3x9k2         # Resume by ID
+```
+
+### `tk export [options]`
+
+Export history to CSV or Markdown.
+
+| Option | Description |
+|--------|-------------|
+| `--format csv\|markdown` | Output format (default: csv) |
+| `--output <file>` | Write to file (default: stdout) |
+
+```bash
+tk export                           # CSV to stdout
+tk export --format markdown         # Markdown table to stdout
+tk export --format csv --output report.csv
+```
+
+### `tk pomodoro <task> [options]`
+
+Run pomodoro work/break cycles with interactive countdown.
+
+| Option | Description |
+|--------|-------------|
+| `--work <minutes>` | Work duration (default: 25) |
+| `--break <minutes>` | Break duration (default: 5) |
+| `--rounds <n>` | Number of rounds (default: 4) |
+| `--tag <tag>` | Add tag(s) |
+
+Each work phase creates a real session (tagged `pomodoro`) that appears in `tk list` and `tk summary`.
+
+```bash
+tk pomodoro "写代码" --work 25 --break 5 --rounds 4 --tag coding
+```
+
 ### `tk sync <path>`
 
 Set sync file path for cross-device sync (Dropbox / iCloud / OneDrive).
@@ -121,7 +198,15 @@ tk sync ~/OneDrive/cace-timer.json
 
 # Windows
 tk sync "%USERPROFILE%\Dropbox\cace-timer.json"
-tk sync "%USERPROFILE%\OneDrive\cace-timer.json"
+```
+
+### `--lang <zh|en>`
+
+Set language. Auto-detects from system locale. Persists to config.
+
+```bash
+tk --lang en help
+tk --lang zh status
 ```
 
 ### `tk help`
@@ -147,6 +232,7 @@ All data is stored in `~/.cace-timer.json`. Single JSON file, easy to backup and
 ```json
 {
   "syncPath": "~/Dropbox/cace-timer.json",
+  "lang": "zh",
   "current": null,
   "history": [
     {
@@ -154,7 +240,7 @@ All data is stored in `~/.cace-timer.json`. Single JSON file, easy to backup and
       "task": "写周报",
       "start": "2024-03-02T10:00:00.000Z",
       "end": "2024-03-02T10:30:00.000Z",
-      "tags": ["work"],
+      "tags": ["work", "daily"],
       "marks": [{ "time": "...", "note": "完成数据分析" }],
       "estimatedMinutes": 30
     }
@@ -170,32 +256,7 @@ npm uninstall -g @cacinie/cace-timer
 
 ## Changelog
 
-### v1.1.1
-
-- Added `prepare` script (fixes git-based installs)
-- Added `types` field for TypeScript consumers
-- Fixed efficiency score display when no estimate was set
-- Fixed efficiency score table mismatch in README
-- Fixed `--limit 0` falsy-zero bug
-- Fixed `--estimate` NaN handling
-- Added Super Happy mascot state and Windows sync paths to README
-- Added uninstall instructions and data format to README
-
-### v1.1.0
-
-- Restructured repo layout (flat structure, no nested `timekeeper/`)
-- Fixed `.gitignore` (dist/ was not properly ignored)
-- Fixed CI workflow (was running in wrong directory)
-- Added Node 18/20/22 matrix in CI
-- Added `engines` field in package.json
-
-### v1.0.0
-
-- Initial release
-- start / mark / stop / status / list / search / sync commands
-- CACE mascot animation
-- Efficiency scoring
-- Cloud sync support
+See [CHANGELOG.md](CHANGELOG.md) for release history.
 
 ## License
 
@@ -222,6 +283,9 @@ npm install -g @cacinie/cace-timer
 - **本地优先**：数据仅存于 `~/.cace-timer.json` 一个 JSON 文件
 - **便携同步**：将数据文件指向 Dropbox、iCloud、OneDrive 或任何同步目录
 - **预估反馈**：对比实际用时与计划时长
+- **统计报表**：日/周/月统计，ASCII 图表，标签分布
+- **番茄钟**：内置番茄钟，工作/休息循环
+- **双语支持**：`--lang` 参数切换中英文
 - **无仪表盘锁定**：随时可查看、备份或迁移
 
 ```
@@ -238,8 +302,8 @@ npm install -g @cacinie/cace-timer
 ## 快速开始
 
 ```bash
-# 开始一个任务
-tk start "写周报" --tag work --estimate 30
+# 开始一个任务（支持多标签！）
+tk start "写周报" --tag work --tag daily --estimate 30
 
 # 标记进度
 tk mark "完成数据分析"
@@ -249,21 +313,28 @@ tk status
 
 # 停止并获得效率评分
 tk stop
+
+# 查看统计
+tk summary --today
+tk summary --week --tag work
+
+# 导出 CSV
+tk export --format csv --output report.csv
 ```
 
 ## 命令
 
 ### `tk start <task> [选项]`
 
-开始一个新任务。
+开始一个新任务。支持多标签。
 
 | 选项 | 说明 |
 |------|------|
-| `--tag <tag>` | 添加标签 |
+| `--tag <tag>` | 添加标签。可多次使用或逗号分隔：`--tag dev --tag api` 或 `--tag dev,api` |
 | `--estimate <minutes>` | 预估时长（用于效率评分） |
 
 ```bash
-tk start "开发登录功能" --tag coding --estimate 60
+tk start "开发登录功能" --tag coding --tag backend --estimate 60
 ```
 
 ### `tk mark <note>`
@@ -285,8 +356,6 @@ tk mark "开始写测试"
 | 80-99% | ⭐ | 略超或刚好达标 |
 | 50-79% | 💪 | 中度超出预估 |
 | <50% | 💀 | 远超预估 |
-
-效率评分仅在任务开始时设置了 `--estimate` 时显示。
 
 ### `tk status`
 
@@ -315,6 +384,75 @@ tk list --tag coding --limit 20
 tk search "登录"
 ```
 
+### `tk summary [选项]`
+
+统计报表，带 ASCII 柱状图。
+
+| 选项 | 说明 |
+|------|------|
+| `--today` | 仅今天 |
+| `--week` | 本周 |
+| `--month` | 本月 |
+| `--tag <tag>` | 按标签筛选 |
+
+显示：总会话数、总/平均时长、标签分布柱状图、每日时长图表（近 7 天）、最长任务 Top 5。
+
+```bash
+tk summary --today
+tk summary --week --tag coding
+tk summary --month
+```
+
+### `tk delete <id | --last>`
+
+从历史记录中删除会话。
+
+```bash
+tk delete --last          # 删除最近一条记录
+tk delete lq3x9k2         # 按 ID 删除
+```
+
+### `tk resume <id | --last>`
+
+恢复已完成的任务为新的会话（复制任务名和标签）。
+
+```bash
+tk resume --last          # 恢复最近任务
+tk resume lq3x9k2         # 按 ID 恢复
+```
+
+### `tk export [选项]`
+
+导出历史数据为 CSV 或 Markdown。
+
+| 选项 | 说明 |
+|------|------|
+| `--format csv\|markdown` | 输出格式（默认 csv） |
+| `--output <file>` | 输出到文件（默认 stdout） |
+
+```bash
+tk export                           # CSV 输出到终端
+tk export --format markdown         # Markdown 表格输出到终端
+tk export --format csv --output report.csv
+```
+
+### `tk pomodoro <task> [选项]`
+
+番茄钟，带交互式倒计时进度条。
+
+| 选项 | 说明 |
+|------|------|
+| `--work <minutes>` | 工作时长（默认 25） |
+| `--break <minutes>` | 休息时长（默认 5） |
+| `--rounds <n>` | 轮数（默认 4） |
+| `--tag <tag>` | 添加标签 |
+
+每个工作阶段会创建一个真实会话（标签为 `pomodoro`），可在 `tk list` 和 `tk summary` 中查看。
+
+```bash
+tk pomodoro "写代码" --work 25 --break 5 --rounds 4 --tag coding
+```
+
 ### `tk sync <path>`
 
 设置同步文件路径，用于跨设备同步（Dropbox / iCloud / OneDrive）。
@@ -322,11 +460,18 @@ tk search "登录"
 ```bash
 # macOS / Linux
 tk sync ~/Dropbox/cace-timer.json
-tk sync ~/OneDrive/cace-timer.json
 
 # Windows
 tk sync "%USERPROFILE%\Dropbox\cace-timer.json"
-tk sync "%USERPROFILE%\OneDrive\cace-timer.json"
+```
+
+### `--lang <zh|en>`
+
+设置语言。自动检测系统语言。设置后持久化到配置。
+
+```bash
+tk --lang en help
+tk --lang zh status
 ```
 
 ### `tk help`
@@ -352,6 +497,7 @@ CACE 会根据你的操作做出反应：
 ```json
 {
   "syncPath": "~/Dropbox/cace-timer.json",
+  "lang": "zh",
   "current": null,
   "history": [
     {
@@ -359,7 +505,7 @@ CACE 会根据你的操作做出反应：
       "task": "写周报",
       "start": "2024-03-02T10:00:00.000Z",
       "end": "2024-03-02T10:30:00.000Z",
-      "tags": ["work"],
+      "tags": ["work", "daily"],
       "marks": [{ "time": "...", "note": "完成数据分析" }],
       "estimatedMinutes": 30
     }
@@ -375,32 +521,7 @@ npm uninstall -g @cacinie/cace-timer
 
 ## 更新日志
 
-### v1.1.1
-
-- 添加 `prepare` 脚本（修复 git 安装问题）
-- 添加 `types` 字段（TypeScript 用户）
-- 修复未设置预估时效率评分显示问题
-- 修复 README 中效率评分表不一致
-- 修复 `--limit 0` 的 falsy-zero bug
-- 修复 `--estimate` 的 NaN 处理
-- README 添加超开心吉祥物状态和 Windows 同步路径
-- README 添加卸载说明和数据格式
-
-### v1.1.0
-
-- 重构仓库布局（扁平结构，无嵌套 `timekeeper/`）
-- 修复 `.gitignore`（dist/ 未正确忽略）
-- 修复 CI 工作流（在错误目录执行）
-- CI 添加 Node 18/20/22 矩阵
-- package.json 添加 `engines` 字段
-
-### v1.0.0
-
-- 初始发布
-- start / mark / stop / status / list / search / sync 命令
-- CACE 吉祥物动画
-- 效率评分
-- 云同步支持
+详见 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 许可
 
