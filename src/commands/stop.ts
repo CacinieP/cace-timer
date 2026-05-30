@@ -23,7 +23,11 @@ export async function cmdStop(options?: { reflection?: string }): Promise<void> 
   const hasEstimate = session.estimatedMinutes && session.estimatedMinutes > 0;
   let efficiency = -1;
   if (hasEstimate) {
-    efficiency = Math.min(100, Math.round((session.estimatedMinutes! / durationMinutes) * 100));
+    if (durationMinutes < 0.01) {
+      efficiency = 100; // sub-second task = perfect
+    } else {
+      efficiency = Math.min(100, Math.round((session.estimatedMinutes! / durationMinutes) * 100));
+    }
   }
 
   // Calculate points

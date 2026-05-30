@@ -46,7 +46,8 @@ export function cmdSummary(options: {
   tag?: string;
 }): void {
   const data = loadData();
-  let sessions = data.history.filter(s => s.end); // only completed sessions
+  const allCompleted = data.history.filter(s => s.end); // all completed, for daily chart
+  let sessions = allCompleted;
 
   // Time filtering
   const now = new Date();
@@ -54,9 +55,10 @@ export function cmdSummary(options: {
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
     sessions = sessions.filter(s => s.start >= todayStart);
   } else if (options.week) {
-    const weekStart = new Date(now);
-    weekStart.setDate(now.getDate() - now.getDay());
-    weekStart.setHours(0, 0, 0, 0);
+    // Start from Monday
+    const dayOfWeek = now.getDay(); // 0=Sun, 1=Mon...
+    const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - mondayOffset);
     sessions = sessions.filter(s => s.start >= weekStart.toISOString());
   } else if (options.month) {
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
@@ -108,8 +110,8 @@ export function cmdSummary(options: {
     })
     .slice(0, 5);
 
-  // Daily hours bar chart (last 7 days)
-  const dailyHours = computeDailyHours(sessions, 7);
+  // Daily hours bar chart (last 7 days, uses ALL completed sessions not filtered by time)
+  const dailyHours = computeDailyHours(allCompleted, 7);
 
   // Render
   showCaceSmall(t('cmd.summary.title'), 'happy');

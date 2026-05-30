@@ -5,6 +5,14 @@ import { t } from '../i18n';
 
 export function cmdSearch(keyword: string): void {
   const data = loadData();
+
+  if (!keyword || keyword.trim() === '') {
+    console.log();
+    showCaceSmall(t('cmd.search.noMatch'), 'sleepy');
+    console.log();
+    return;
+  }
+
   const results = data.history.filter(
     s =>
       s.task.toLowerCase().includes(keyword.toLowerCase()) ||
