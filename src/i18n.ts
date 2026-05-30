@@ -188,6 +188,48 @@ const strings: Record<Locale, LocaleStrings> = {
     'cmd.pomodoro.interrupted': '番茄钟已中断',
     'cmd.pomodoro.starting': '番茄钟开始',
 
+    // Score / Level / Streak
+    'score.earned': '+{points} 积分',
+    'score.total': '总积分',
+    'score.level': '等级',
+    'score.progress': '{current}/{needed} 升级',
+    'score.streak': '连续打卡',
+    'score.streakDays': '{days} 天',
+    'score.streakFire': '🔥 连续 {days} 天！',
+    'score.newStreak': '🎉 开始新的打卡记录！',
+
+    // Reflection
+    'cmd.stop.reflection': '💭 心得感悟（可选，按 Enter 跳过）',
+    'cmd.stop.reflectionSaved': '心得已保存',
+
+    // Focus shortcut
+    'cmd.focus.alias': '快捷专注',
+    'cmd.focus.start': '开始专注: {task} ({minutes}分钟)',
+    'cmd.focus.encourage1': '💪 加油，专注就是力量！',
+    'cmd.focus.encourage2': '🎯 保持专注，你在进步！',
+    'cmd.focus.encourage3': '⭐ 你做得很棒！继续！',
+    'cmd.focus.encourage4': '🚀 专注中的你最有魅力！',
+    'cmd.focus.encourage5': '🌸 每一分钟的专注都算数！',
+    'cmd.focus.encourage6': '✨ 深呼吸，继续前进！',
+
+    // Guardian / Mascot moods
+    'mascot.encourage1': 'CACE 正在注视着你...',
+    'mascot.encourage2': 'CACE 相信你可以的！',
+    'mascot.encourage3': 'CACE: 坚持住！',
+    'mascot.focused': '😤 专注中...',
+    'mascot.celebrating': '🎉 太棒了！',
+    'mascot.disappointed': '😴 别灰心，明天再来！',
+
+    // Status enhancements
+    'cmd.status.level': '📊 Lv.{level} | {score} pts',
+    'cmd.status.streak': '{fire} 连续 {days} 天',
+    'cmd.status.noStreak': '今天开始打卡吧！',
+
+    // Help additions
+    'cmd.help.focus': 'tk focus <5|15|30|60> [任务名]',
+    'cmd.help.focusDesc': '快捷专注（等同于番茄钟）',
+    'cmd.help.stopReflection': '    --reflection <text>  记录心得感悟',
+
     // Error
     'error.unknownCommand': '未知命令: {command}',
     'error.useHelp': '使用 tk help 查看帮助',
@@ -352,6 +394,48 @@ const strings: Record<Locale, LocaleStrings> = {
     'cmd.pomodoro.roundsCompleted': 'Rounds completed',
     'cmd.pomodoro.interrupted': 'Pomodoro interrupted',
     'cmd.pomodoro.starting': 'Pomodoro starting',
+
+    // Score / Level / Streak
+    'score.earned': '+{points} pts',
+    'score.total': 'Total score',
+    'score.level': 'Level',
+    'score.progress': '{current}/{needed} to next',
+    'score.streak': 'Streak',
+    'score.streakDays': '{days} days',
+    'score.streakFire': '🔥 {days} day streak!',
+    'score.newStreak': '🎉 New streak started!',
+
+    // Reflection
+    'cmd.stop.reflection': '💭 Reflection (optional, press Enter to skip)',
+    'cmd.stop.reflectionSaved': 'Reflection saved',
+
+    // Focus shortcut
+    'cmd.focus.alias': 'Quick focus',
+    'cmd.focus.start': 'Focus: {task} ({minutes}min)',
+    'cmd.focus.encourage1': '💪 Keep going, focus is power!',
+    'cmd.focus.encourage2': '🎯 Stay focused, you are improving!',
+    'cmd.focus.encourage3': '⭐ You are doing great! Keep it up!',
+    'cmd.focus.encourage4': '🚀 You shine brightest when focused!',
+    'cmd.focus.encourage5': '🌸 Every minute of focus counts!',
+    'cmd.focus.encourage6': '✨ Take a deep breath, keep going!',
+
+    // Guardian / Mascot moods
+    'mascot.encourage1': 'CACE is watching you...',
+    'mascot.encourage2': 'CACE believes in you!',
+    'mascot.encourage3': 'CACE: Hang in there!',
+    'mascot.focused': '😤 Focused...',
+    'mascot.celebrating': '🎉 Awesome!',
+    'mascot.disappointed': '😴 Don\'t worry, try again tomorrow!',
+
+    // Status enhancements
+    'cmd.status.level': '📊 Lv.{level} | {score} pts',
+    'cmd.status.streak': '{fire} {days} day streak',
+    'cmd.status.noStreak': 'Start your streak today!',
+
+    // Help additions
+    'cmd.help.focus': 'tk focus <5|15|30|60> [task]',
+    'cmd.help.focusDesc': 'Quick focus (same as pomodoro)',
+    'cmd.help.stopReflection': '    --reflection <text>  Save reflection',
 
     // Error
     'error.unknownCommand': 'Unknown command: {command}',

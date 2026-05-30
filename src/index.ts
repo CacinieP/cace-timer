@@ -52,7 +52,9 @@ async function main(): Promise<void> {
       break;
 
     case 'stop':
-      await cmdStop();
+      await cmdStop({
+        reflection: options.reflection as string | undefined,
+      });
       break;
 
     case 'status':
@@ -114,6 +116,19 @@ async function main(): Promise<void> {
         tag: options.tag as string | string[] | undefined,
       });
       break;
+
+    case 'focus': {
+      // Quick focus: tk focus <5|15|30|60> [task]
+      const minutes = positional[0] ? parseInt(positional[0]) : 25;
+      const focusTask = positional[1] || t('cmd.focus.alias');
+      await cmdPomodoro(focusTask, {
+        work: minutes,
+        break: 5,
+        rounds: 1,
+        tag: options.tag as string | string[] | undefined,
+      });
+      break;
+    }
 
     case 'help':
     case '--help':

@@ -1,9 +1,9 @@
-import { loadData, saveData } from '../data';
+import { loadData, saveData, calculatePoints, scoreToLevel, pointsToNextLevel, updateStreak } from '../data';
 import { showCaceSmall } from '../mascot';
 import { formatDuration } from '../utils';
 import { t } from '../i18n';
 
-export async function cmdStop(): Promise<void> {
+export async function cmdStop(options?: { reflection?: string }): Promise<void> {
   const data = loadData();
 
   if (!data.current) {
@@ -24,12 +24,28 @@ export async function cmdStop(): Promise<void> {
     efficiency = Math.min(100, Math.round((session.estimatedMinutes! / durationMinutes) * 100));
   }
 
+  // Calculate points
+  const effForPoints = hasEstimate ? efficiency : 50; // default mid efficiency if no estimate
+  const points = calculatePoints(durationMinutes, effForPoints);
+  session.pointsEarned = points;
+
+  // Save reflection if provided
+  if (options?.reflection) {
+    session.reflection = options.reflection;
+  }
+
+  // Update score, streak
+  data.score = (data.score || 0) + points;
+  updateStreak(data);
+  const level = scoreToLevel(data.score);
+  const levelProgress = pointsToNextLevel(data.score);
+
   data.history.unshift(session);
   data.current = null;
   saveData(data);
 
   console.log();
-  showCaceSmall(t('cmd.stop.taskComplete'), 'happy');
+  showCaceSmall(t('cmd.stop.taskComplete'), 'celebrating');
   console.log();
   console.log('  ┌─────────────────────────────────┐');
   console.log(`  │          ${t('cmd.stop.taskSummary')}            │`);
@@ -60,6 +76,23 @@ export async function cmdStop(): Promise<void> {
     console.log(`  ${effEmoji} ${t('cmd.stop.efficiencyScore')}: ${effColor}${efficiency}%\x1b[0m`);
   } else {
     console.log(`  ⏱  ${t('cmd.stop.noEstimate')}`);
+  }
+
+  // Points & Level
+  console.log(`  \x1b[33m${t('score.earned', { points: String(points) })}\x1b[0m`);
+  console.log(`  ${t('cmd.status.level', { level: String(level), score: String(data.score) })}`);
+  console.log(`  ${t('score.progress', { current: String(levelProgress.current), needed: String(levelProgress.needed) })}`);
+
+  // Streak
+  if (data.streak > 1) {
+    console.log(`  ${t('score.streakFire', { days: String(data.streak) })}`);
+  } else if (data.streak === 1) {
+    console.log(`  ${t('score.newStreak')}`);
+  }
+
+  // Reflection
+  if (session.reflection) {
+    console.log(`  💭 ${session.reflection}`);
   }
   console.log();
 }

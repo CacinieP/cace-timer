@@ -60,6 +60,9 @@ export function cmdHelp(): void {
   console.log(`     ${t('cmd.help.pomodoroRounds')}`);
   console.log(`     ${t('cmd.help.pomodoroTag')}`);
   console.log();
+  console.log(`  ${t('cmd.help.focus')}`);
+  console.log(`     ${t('cmd.help.focusDesc')}`);
+  console.log();
   console.log(`  ${t('cmd.help.lang')}`);
   console.log();
   console.log(`  ${t('cmd.help.help')}`);

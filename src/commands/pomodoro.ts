@@ -4,6 +4,14 @@ import { generateId, formatDuration } from '../utils';
 import { t } from '../i18n';
 import { Session } from '../types';
 
+function getRandomEncouragement(): string {
+  const keys = [
+    'cmd.focus.encourage1', 'cmd.focus.encourage2', 'cmd.focus.encourage3',
+    'cmd.focus.encourage4', 'cmd.focus.encourage5', 'cmd.focus.encourage6',
+  ];
+  return t(keys[Math.floor(Math.random() * keys.length)]);
+}
+
 function normalizeTags(
   rawTag: string | string[] | undefined,
 ): string[] {
@@ -94,6 +102,7 @@ export async function cmdPomodoro(
     saveData(data);
 
     console.log(`  ${t('cmd.pomodoro.round', { round: String(round), total: String(rounds) })} [${t('cmd.pomodoro.workPhase')}]`);
+    console.log(`  ${getRandomEncouragement()}`);
     await runCountdown(workMin * 60 * 1000);
 
     // Stop work session

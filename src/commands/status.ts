@@ -1,13 +1,24 @@
-import { loadData } from '../data';
+import { loadData, scoreToLevel } from '../data';
 import { showCaceSmall } from '../mascot';
 import { formatDuration, formatTime } from '../utils';
 import { t } from '../i18n';
 
 export function cmdStatus(): void {
   const data = loadData();
+  const level = scoreToLevel(data.score || 0);
 
   console.log();
   showCaceSmall('', data.current ? 'normal' : 'sleepy');
+
+  // Always show level and streak
+  console.log(`  ${t('cmd.status.level', { level: String(level), score: String(data.score || 0) })}`);
+  if (data.streak > 1) {
+    console.log(`  ${t('score.streakFire', { days: String(data.streak) })}`);
+  } else if (data.streak === 1) {
+    console.log(`  ${t('score.newStreak')}`);
+  } else {
+    console.log(`  ${t('cmd.status.noStreak')}`);
+  }
 
   if (!data.current) {
     console.log();
