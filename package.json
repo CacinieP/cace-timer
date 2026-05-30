@@ -1,6 +1,6 @@
 {
   "name": "@cacinie/cace-timer",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "A minimal time tracking CLI with cute anime girl mascot",
   "main": "dist/index.js",
   "bin": {

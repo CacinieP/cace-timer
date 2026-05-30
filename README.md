@@ -5,55 +5,84 @@
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-339933.svg)](package.json)
 [![license](https://img.shields.io/npm/l/@cacinie/cace-timer.svg)](https://github.com/CacinieP/cace-timer/blob/main/LICENSE)
 
-A minimal time-tracking CLI for people who want a fast terminal workflow, plain JSON data, and no account system.
+A gamified time-tracking CLI with an interactive TUI dashboard, points & levels, and a cute mascot.
 
 ```
 npm install -g @cacinie/cace-timer
 ```
 
-## Why cace-timer
-
-- **Fast capture**: start, mark, stop, and search from the terminal
-- **Local-first data**: one JSON file at `~/.cace-timer.json`
-- **Portable sync**: point the data file at Dropbox, iCloud, OneDrive, or any synced folder
-- **Estimate feedback**: compare actual time with your planned duration
-- **Statistics**: daily/weekly/monthly reports with ASCII charts
-- **Pomodoro**: built-in pomodoro timer with work/break cycles
-- **Bilingual**: Chinese and English UI with `--lang` flag
-- **No dashboard lock-in**: easy to inspect, back up, or migrate
-
 ```
-  ▄▄▄▄▄▄▄▄▄▄▄▄
- █░░░░░░░░░░░░█
- █░▄▄▄▄▄▄▄▄▄░█
- █░│ ●   ● │░█
- █░│   ▽   │░█
- █░│  ───  │░█
- ╰────────────╯
-   CACE TIMER
+       ╭──────────╮
+       │  ●   ●   │
+       │    ▽     │
+       │   ───    │
+       ╰──┬────┬──╯
+       ╭──┴────┴──╮
+       │  ╔════╗  │
+       │  ║ CACE║  │
+       │  ╚════╝  │
+       ╰────┬┬────╯
+         ╭──┘└──╮
+         │      │
+         ╰──┬┬──╯
+           ╭┘└╮
+       CACE TIMER
 ```
+
+## Features
+
+- **Smart Dashboard** — run `tk` and get a context-aware interactive menu
+- **Points & Levels** — earn points for focus, level up from Lv.1 to Lv.99
+- **Daily Streaks** — consecutive days of productivity tracked with 🔥
+- **Pomodoro Timer** — full-screen TUI countdown with mascot and progress bar
+- **Quick Focus** — `tk focus 5/15/30/60` for instant timer
+- **Reflection** — record thoughts when completing tasks
+- **Statistics** — daily/weekly/monthly reports with ASCII charts
+- **Bilingual** — `--lang zh|en`, auto-detects system locale
+- **Export** — CSV or Markdown output
+- **Cloud Sync** — point data file at Dropbox/iCloud/OneDrive
 
 ## Quick Start
 
 ```bash
-# Start a task (multi-tag supported!)
+# Open the interactive dashboard
+tk
+
+# Or use commands directly
 tk start "写周报" --tag work --tag daily --estimate 30
-
-# Mark progress
 tk mark "完成数据分析"
-
-# Check status
 tk status
-
-# Stop and get efficiency score
 tk stop
+```
 
-# View statistics
-tk summary --today
-tk summary --week --tag work
+## Smart Dashboard
 
-# Export to CSV
-tk export --format csv --output report.csv
+Running `tk` with no arguments opens an interactive TUI dashboard:
+
+**No active task:**
+```
+  [CACE mascot — sleepy]
+  📊 Lv.2 | 20 pts | 🔥 3 day streak
+
+  [s] 🚀 Start task
+  [f] 🍅 Quick focus
+  [b] 📊 Statistics
+  [l] 📋 History
+  [?] ❓ Help
+```
+
+**Active task in progress:**
+```
+  [CACE mascot — focused]
+  📊 Lv.2 | 20 pts
+
+  🔥 In progress: 写周报 | Elapsed: 15m 30s
+
+  [m] 📍 Mark checkpoint
+  [s] ⏹  Stop task
+  [b] 📊 Statistics
+  [l] 📋 History
+  [?] ❓ Help
 ```
 
 ## Commands
@@ -64,40 +93,28 @@ Start a new task. Supports multiple tags.
 
 | Option | Description |
 |--------|-------------|
-| `--tag <tag>` | Add tag(s). Use multiple times or comma-separated: `--tag dev --tag api` or `--tag dev,api` |
-| `--estimate <minutes>` | Estimated duration (for efficiency score) |
+| `--tag <tag>` | Add tag(s). Repeatable: `--tag dev --tag api` or `--tag dev,api` |
+| `--estimate <minutes>` | Estimated duration for efficiency scoring |
 
-```bash
-tk start "开发登录功能" --tag coding --tag backend --estimate 60
-```
+### `tk stop [options]`
+
+Stop current task. Shows summary, efficiency score, and points earned.
+
+| Option | Description |
+|--------|-------------|
+| `--reflection <text>` | Attach a completion note |
+
+In interactive terminals, a TUI input box appears for reflection.
 
 ### `tk mark <note>`
 
-Record a time checkpoint.
-
-```bash
-tk mark "完成API接口"
-tk mark "开始写测试"
-```
-
-### `tk stop`
-
-Stop current task, show summary and efficiency score.
-
-| Score | Emoji | Meaning |
-|-------|-------|---------|
-| 100% | 🏆 | Actual ≤ Estimate |
-| 80-99% | ⭐ | Slightly over or on target |
-| 50-79% | 💪 | Moderately over estimate |
-| <50% | 💀 | Far over estimate |
+Record a time checkpoint within the active task.
 
 ### `tk status`
 
-Show current running task.
+Show current task, level, and streak.
 
 ### `tk list [options]`
-
-View history.
 
 | Option | Description |
 |--------|-------------|
@@ -105,74 +122,41 @@ View history.
 | `--tag <tag>` | Filter by tag |
 | `--limit <n>` | Limit count (default 10) |
 
-```bash
-tk list --today
-tk list --tag coding --limit 20
-```
-
 ### `tk search <keyword>`
 
 Search across task names, tags, and mark notes.
 
-```bash
-tk search "登录"
-```
-
 ### `tk summary [options]`
 
-Statistics report with ASCII bar charts.
+Statistics report with ASCII charts.
 
 | Option | Description |
 |--------|-------------|
 | `--today` | Today only |
-| `--week` | This week |
+| `--week` | This week (Monday start) |
 | `--month` | This month |
 | `--tag <tag>` | Filter by tag |
 
-Shows: total sessions, total/average duration, tag distribution with bars, daily hours chart (last 7 days), top 5 longest tasks.
-
-```bash
-tk summary --today
-tk summary --week --tag coding
-tk summary --month
-```
+Shows: total sessions, total/average duration, tag distribution bars, daily hours chart (last 7 days), top 5 longest tasks.
 
 ### `tk delete <id | --last>`
 
 Delete a session from history.
 
-```bash
-tk delete --last          # Delete most recent record
-tk delete lq3x9k2         # Delete by ID
-```
-
 ### `tk resume <id | --last>`
 
-Resume a completed task as a new session (copies task name and tags).
-
-```bash
-tk resume --last          # Resume most recent task
-tk resume lq3x9k2         # Resume by ID
-```
+Resume a completed task as a new session.
 
 ### `tk export [options]`
-
-Export history to CSV or Markdown.
 
 | Option | Description |
 |--------|-------------|
 | `--format csv\|markdown` | Output format (default: csv) |
 | `--output <file>` | Write to file (default: stdout) |
 
-```bash
-tk export                           # CSV to stdout
-tk export --format markdown         # Markdown table to stdout
-tk export --format csv --output report.csv
-```
-
 ### `tk pomodoro <task> [options]`
 
-Run pomodoro work/break cycles with interactive countdown.
+Full-screen TUI pomodoro timer with mascot, countdown, and encouragement.
 
 | Option | Description |
 |--------|-------------|
@@ -181,68 +165,84 @@ Run pomodoro work/break cycles with interactive countdown.
 | `--rounds <n>` | Number of rounds (default: 4) |
 | `--tag <tag>` | Add tag(s) |
 
-Each work phase creates a real session (tagged `pomodoro`) that appears in `tk list` and `tk summary`.
+### `tk focus <5\|15\|30\|60> [task]`
 
-```bash
-tk pomodoro "写代码" --work 25 --break 5 --rounds 4 --tag coding
-```
+Quick one-shot focus timer. Shortcut for `tk pomodoro` with 1 round.
 
 ### `tk sync <path>`
 
-Set sync file path for cross-device sync (Dropbox / iCloud / OneDrive).
-
-```bash
-# macOS / Linux
-tk sync ~/Dropbox/cace-timer.json
-tk sync ~/OneDrive/cace-timer.json
-
-# Windows
-tk sync "%USERPROFILE%\Dropbox\cace-timer.json"
-```
+Set sync file path for cross-device sync.
 
 ### `--lang <zh|en>`
 
-Set language. Auto-detects from system locale. Persists to config.
-
-```bash
-tk --lang en help
-tk --lang zh status
-```
+Set language. Auto-detects system locale. Persists to config.
 
 ### `tk help`
 
-Show help.
+Show full command reference.
+
+## Gamification
+
+### Points System
+
+| Condition | Points |
+|-----------|--------|
+| Complete a task | +10 |
+| Efficiency ≥ 80% | +5 bonus |
+| Efficiency = 100% | +5 bonus |
+| Deep work (≥ 25 min) | +5 bonus |
+
+### Levels
+
+Progressive XP curve: each level requires `level × 20` more points.
+
+| Level | Total Points |
+|-------|-------------|
+| 1 | 0 |
+| 2 | 20 |
+| 3 | 60 |
+| 5 | 200 |
+| 10 | 900 |
+
+### Daily Streak
+
+Consecutive days with at least one completed task. Break a day and the streak resets.
 
 ## CACE Mascot
 
-CACE reacts to what you do:
+CACE has 5 moods that change based on context:
 
-| State | Eyes | Mouth | When |
-|-------|------|-------|------|
-| Normal | ● ● | ─── | Default |
+| Mood | Eyes | Mouth | When |
+|------|------|-------|------|
+| Normal | ● ● | ─── | Default display |
 | Happy | ★ ★ | ◡◡◡ | Task completed |
-| Super Happy | ◉ ◉ | ▽△▽ | Animation frame |
-| Sleepy | ─ ─ | ─── | No active task |
-| Blink | ─ ─ | ─── | Animation frame |
+| Focused | ◆ ◆ | ▬▬▬ | Pomodoro / active task |
+| Celebrating | ◉ ◉ | ▽△▽ | Points earned + arms up |
+| Sleepy | ─ ─ | ～～ | No active task |
 
 ## Data
 
-All data is stored in `~/.cace-timer.json`. Single JSON file, easy to backup and sync.
+All data stored in `~/.cace-timer.json`.
 
 ```json
 {
   "syncPath": "~/Dropbox/cace-timer.json",
   "lang": "zh",
+  "score": 45,
+  "streak": 3,
+  "lastActiveDate": "2026-05-31",
   "current": null,
   "history": [
     {
       "id": "lq3x9k2",
       "task": "写周报",
-      "start": "2024-03-02T10:00:00.000Z",
-      "end": "2024-03-02T10:30:00.000Z",
+      "start": "2026-05-31T10:00:00.000Z",
+      "end": "2026-05-31T10:30:00.000Z",
       "tags": ["work", "daily"],
       "marks": [{ "time": "...", "note": "完成数据分析" }],
-      "estimatedMinutes": 30
+      "estimatedMinutes": 30,
+      "reflection": "今天效率不错",
+      "pointsEarned": 20
     }
   ]
 }
@@ -271,118 +271,108 @@ MIT
 [![Node.js](https://img.shields.io/badge/node-%3E%3D18-339933.svg)](package.json)
 [![license](https://img.shields.io/npm/l/@cacinie/cace-timer.svg)](https://github.com/CacinieP/cace-timer/blob/main/LICENSE)
 
-极简时间追踪 CLI，面向想要快速终端工作流、纯 JSON 数据、无账号系统的人。
+游戏化时间追踪 CLI，带交互式 TUI 仪表盘、积分等级系统和可爱吉祥物。
 
 ```
 npm install -g @cacinie/cace-timer
 ```
 
-## 为什么选 cace-timer
+## 特性
 
-- **快速记录**：终端里 start、mark、stop、search 一气呵成
-- **本地优先**：数据仅存于 `~/.cace-timer.json` 一个 JSON 文件
-- **便携同步**：将数据文件指向 Dropbox、iCloud、OneDrive 或任何同步目录
-- **预估反馈**：对比实际用时与计划时长
-- **统计报表**：日/周/月统计，ASCII 图表，标签分布
-- **番茄钟**：内置番茄钟，工作/休息循环
-- **双语支持**：`--lang` 参数切换中英文
-- **无仪表盘锁定**：随时可查看、备份或迁移
-
-```
-  ▄▄▄▄▄▄▄▄▄▄▄▄
- █░░░░░░░░░░░░█
- █░▄▄▄▄▄▄▄▄▄░█
- █░│ ●   ● │░█
- █░│   ▽   │░█
- █░│  ───  │░█
- ╰────────────╯
-   CACE TIMER
-```
+- **智能仪表盘** — 输入 `tk` 即可打开上下文感知的交互菜单
+- **积分与等级** — 完成任务赚积分，从 Lv.1 升到 Lv.99
+- **每日打卡** — 连续天数追踪，显示火焰 🔥
+- **番茄钟** — 全屏 TUI 倒计时 + 吉祥物 + 进度条
+- **快捷专注** — `tk focus 5/15/30/60` 一键开始
+- **完成心得** — 任务完成时记录感想
+- **统计报表** — 日/周/月统计，ASCII 柱状图
+- **双语支持** — `--lang zh|en`，自动检测系统语言
+- **数据导出** — CSV 或 Markdown 格式
+- **云同步** — 数据文件指向 Dropbox/iCloud/OneDrive
 
 ## 快速开始
 
 ```bash
-# 开始一个任务（支持多标签！）
+# 打开交互仪表盘
+tk
+
+# 或直接用命令
 tk start "写周报" --tag work --tag daily --estimate 30
-
-# 标记进度
 tk mark "完成数据分析"
-
-# 查看状态
 tk status
-
-# 停止并获得效率评分
 tk stop
+```
 
-# 查看统计
-tk summary --today
-tk summary --week --tag work
+## 智能仪表盘
 
-# 导出 CSV
-tk export --format csv --output report.csv
+输入 `tk`（无参数）打开 TUI 仪表盘：
+
+**无活跃任务：**
+```
+  [CACE 吉祥物 — 困了]
+  📊 Lv.2 | 20 积分 | 🔥 连续 3 天
+
+  [s] 🚀 开始任务
+  [f] 🍅 快捷专注
+  [b] 📊 统计报表
+  [l] 📋 历史记录
+  [?] ❓ 帮助
+```
+
+**有活跃任务：**
+```
+  [CACE 吉祥物 — 专注中]
+  📊 Lv.2 | 20 积分
+
+  🔥 进行中: 写周报 | 已用时: 15m 30s
+
+  [m] 📍 标记进度
+  [s] ⏹  停止任务
+  [b] 📊 统计报表
+  [l] 📋 历史记录
+  [?] ❓ 帮助
 ```
 
 ## 命令
 
-### `tk start <task> [选项]`
+### `tk start <任务名> [选项]`
 
-开始一个新任务。支持多标签。
+开始新任务，支持多标签。
 
 | 选项 | 说明 |
 |------|------|
-| `--tag <tag>` | 添加标签。可多次使用或逗号分隔：`--tag dev --tag api` 或 `--tag dev,api` |
-| `--estimate <minutes>` | 预估时长（用于效率评分） |
+| `--tag <标签>` | 多标签：`--tag dev --tag api` 或 `--tag dev,api` |
+| `--estimate <分钟>` | 预估时长（效率评分） |
 
-```bash
-tk start "开发登录功能" --tag coding --tag backend --estimate 60
-```
+### `tk stop [选项]`
 
-### `tk mark <note>`
+停止当前任务，显示摘要、效率评分、获得积分。
 
-记录一个时间节点。
+| 选项 | 说明 |
+|------|------|
+| `--reflection <文本>` | 附加完成心得 |
 
-```bash
-tk mark "完成API接口"
-tk mark "开始写测试"
-```
+交互终端中会自动弹出输入框。
 
-### `tk stop`
+### `tk mark <备注>`
 
-停止当前任务，显示摘要和效率评分。
-
-| 评分 | Emoji | 含义 |
-|------|-------|------|
-| 100% | 🏆 | 实际 ≤ 预估 |
-| 80-99% | ⭐ | 略超或刚好达标 |
-| 50-79% | 💪 | 中度超出预估 |
-| <50% | 💀 | 远超预估 |
+在活跃任务中记录时间节点。
 
 ### `tk status`
 
-显示当前运行中的任务。
+显示当前任务、等级和打卡天数。
 
 ### `tk list [选项]`
-
-查看历史记录。
 
 | 选项 | 说明 |
 |------|------|
 | `--today` | 仅今天 |
-| `--tag <tag>` | 按标签过滤 |
-| `--limit <n>` | 限制数量（默认 10） |
+| `--tag <标签>` | 按标签筛选 |
+| `--limit <数量>` | 限制数量（默认 10） |
 
-```bash
-tk list --today
-tk list --tag coding --limit 20
-```
-
-### `tk search <keyword>`
+### `tk search <关键词>`
 
 搜索任务名称、标签和标记备注。
-
-```bash
-tk search "登录"
-```
 
 ### `tk summary [选项]`
 
@@ -391,127 +381,94 @@ tk search "登录"
 | 选项 | 说明 |
 |------|------|
 | `--today` | 仅今天 |
-| `--week` | 本周 |
+| `--week` | 本周（周一开始） |
 | `--month` | 本月 |
-| `--tag <tag>` | 按标签筛选 |
-
-显示：总会话数、总/平均时长、标签分布柱状图、每日时长图表（近 7 天）、最长任务 Top 5。
-
-```bash
-tk summary --today
-tk summary --week --tag coding
-tk summary --month
-```
+| `--tag <标签>` | 按标签筛选 |
 
 ### `tk delete <id | --last>`
 
-从历史记录中删除会话。
-
-```bash
-tk delete --last          # 删除最近一条记录
-tk delete lq3x9k2         # 按 ID 删除
-```
+删除历史记录。
 
 ### `tk resume <id | --last>`
 
-恢复已完成的任务为新的会话（复制任务名和标签）。
-
-```bash
-tk resume --last          # 恢复最近任务
-tk resume lq3x9k2         # 按 ID 恢复
-```
+恢复已完成任务为新会话。
 
 ### `tk export [选项]`
-
-导出历史数据为 CSV 或 Markdown。
 
 | 选项 | 说明 |
 |------|------|
 | `--format csv\|markdown` | 输出格式（默认 csv） |
-| `--output <file>` | 输出到文件（默认 stdout） |
+| `--output <文件>` | 输出到文件（默认 stdout） |
 
-```bash
-tk export                           # CSV 输出到终端
-tk export --format markdown         # Markdown 表格输出到终端
-tk export --format csv --output report.csv
-```
+### `tk pomodoro <任务名> [选项]`
 
-### `tk pomodoro <task> [选项]`
-
-番茄钟，带交互式倒计时进度条。
+全屏 TUI 番茄钟，带吉祥物、倒计时和鼓励语。
 
 | 选项 | 说明 |
 |------|------|
-| `--work <minutes>` | 工作时长（默认 25） |
-| `--break <minutes>` | 休息时长（默认 5） |
-| `--rounds <n>` | 轮数（默认 4） |
-| `--tag <tag>` | 添加标签 |
+| `--work <分钟>` | 工作时长（默认 25） |
+| `--break <分钟>` | 休息时长（默认 5） |
+| `--rounds <数量>` | 轮数（默认 4） |
+| `--tag <标签>` | 添加标签 |
 
-每个工作阶段会创建一个真实会话（标签为 `pomodoro`），可在 `tk list` 和 `tk summary` 中查看。
+### `tk focus <5\|15\|30\|60> [任务名]`
 
-```bash
-tk pomodoro "写代码" --work 25 --break 5 --rounds 4 --tag coding
-```
+快捷专注，一键启动单轮番茄钟。
 
-### `tk sync <path>`
+### `tk sync <路径>`
 
-设置同步文件路径，用于跨设备同步（Dropbox / iCloud / OneDrive）。
-
-```bash
-# macOS / Linux
-tk sync ~/Dropbox/cace-timer.json
-
-# Windows
-tk sync "%USERPROFILE%\Dropbox\cace-timer.json"
-```
+设置同步文件路径。
 
 ### `--lang <zh|en>`
 
-设置语言。自动检测系统语言。设置后持久化到配置。
-
-```bash
-tk --lang en help
-tk --lang zh status
-```
+设置语言，自动检测系统语言，持久化到配置。
 
 ### `tk help`
 
-显示帮助。
+显示完整命令参考。
+
+## 游戏化
+
+### 积分系统
+
+| 条件 | 积分 |
+|------|------|
+| 完成任务 | +10 |
+| 效率 ≥ 80% | +5 奖励 |
+| 效率 = 100% | +5 奖励 |
+| 深度工作（≥ 25 分钟） | +5 奖励 |
+
+### 等级系统
+
+递增经验曲线：每级需要 `等级 × 20` 积分。
+
+| 等级 | 总积分 |
+|------|--------|
+| 1 | 0 |
+| 2 | 20 |
+| 3 | 60 |
+| 5 | 200 |
+| 10 | 900 |
+
+### 每日打卡
+
+连续每天完成至少一个任务。中断一天则重新计数。
 
 ## CACE 吉祥物
 
-CACE 会根据你的操作做出反应：
+CACE 有 5 种心情，根据场景变化：
 
-| 状态 | 眼睛 | 嘴巴 | 时机 |
+| 心情 | 眼睛 | 嘴巴 | 时机 |
 |------|------|------|------|
-| 正常 | ● ● | ─── | 默认 |
+| 正常 | ● ● | ─── | 默认显示 |
 | 开心 | ★ ★ | ◡◡◡ | 任务完成 |
-| 超开心 | ◉ ◉ | ▽△▽ | 动画帧 |
-| 困了 | ─ ─ | ─── | 无活动任务 |
-| 眨眼 | ─ ─ | ─── | 动画帧 |
+| 专注 | ◆ ◆ | ▬▬▬ | 番茄钟 / 活跃任务 |
+| 庆祝 | ◉ ◉ | ▽△▽ | 获得积分 + 举手 |
+| 困了 | ─ ─ | ～～ | 无活跃任务 |
 
 ## 数据
 
-所有数据存储在 `~/.cace-timer.json`，单 JSON 文件，便于备份和同步。
-
-```json
-{
-  "syncPath": "~/Dropbox/cace-timer.json",
-  "lang": "zh",
-  "current": null,
-  "history": [
-    {
-      "id": "lq3x9k2",
-      "task": "写周报",
-      "start": "2024-03-02T10:00:00.000Z",
-      "end": "2024-03-02T10:30:00.000Z",
-      "tags": ["work", "daily"],
-      "marks": [{ "time": "...", "note": "完成数据分析" }],
-      "estimatedMinutes": 30
-    }
-  ]
-}
-```
+所有数据存储在 `~/.cace-timer.json`。
 
 ## 卸载
 

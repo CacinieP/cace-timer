@@ -1,151 +1,168 @@
 import { sleep } from './utils';
 import { t } from './i18n';
 
-// ============ CACE TIMER Animation ============
-// Full-body mascot with different expressions
+// ============ CACE TIMER Mascot ============
+// 可爱短发小女孩 — 完整身体设计
+// 动画帧用于开场动画，各 mood 用于内联显示
 
 const CACE_FRAMES = [
-  // Frame 1: 正常
+  // Frame 1: 正常站立
   `
-     ▄▄▄▄▄▄▄▄▄▄▄▄
-    █░░░░░░░░░░░░█
-    █░▄▄▄▄▄▄▄▄▄░█
-    █░│ ●   ● │░█
-    █░│   ▽   │░█
-    █░│  ───  │░█
-    ╰────────────╯
-       ╭──────╮
-       │ ▓▓▓▓ │
-       │ ▓▓▓▓ │
-       ╰──────╯
-       ╭──┬──╮
-       │  │  │
-       ╰──┴──╯`,
+       ╭──────────╮
+       │  ●   ●   │
+       │    ▽     │
+       │   ───    │
+       ╰──┬────┬──╯
+       ╭──┴────┴──╮
+       │  ╔════╗  │
+       │  ║ CACE║  │
+       │  ╚════╝  │
+       ╰────┬┬────╯
+         ╭──┘└──╮
+         │      │
+         ╰──┬┬──╯
+           ╭┘└╮`,
   // Frame 2: 眨眼
   `
-     ▄▄▄▄▄▄▄▄▄▄▄▄
-    █░░░░░░░░░░░░█
-    █░▄▄▄▄▄▄▄▄▄░█
-    █░│ ─   ─ │░█
-    █░│   ▽   │░█
-    █░│  ───  │░█
-    ╰────────────╯
-       ╭──────╮
-       │ ▓▓▓▓ │
-       │ ▓▓▓▓ │
-       ╰──────╯
-       ╭──┬──╮
-       │  │  │
-       ╰──┴──╯`,
-  // Frame 3: 开心
+       ╭──────────╮
+       │  ─   ─   │
+       │    ▽     │
+       │   ───    │
+       ╰──┬────┬──╯
+       ╭──┴────┴──╮
+       │  ╔════╗  │
+       │  ║ CACE║  │
+       │  ╚════╝  │
+       ╰────┬┬────╯
+         ╭──┘└──╮
+         │      │
+         ╰──┬┬──╯
+           ╭┘└╮`,
+  // Frame 3: 微笑
   `
-     ▄▄▄▄▄▄▄▄▄▄▄▄
-    █░░░░░░░░░░░░█
-    █░▄▄▄▄▄▄▄▄▄░█
-    █░│ ★   ★ │░█
-    █░│   ▽   │░█
-    █░│  ◡◡◡  │░█
-    ╰────────────╯
-       ╭──────╮
-       │ ▓▓▓▓ │
-       │ ▓▓▓▓ │
-       ╰──────╯
-      ╭─┴──┴─╮
-      │      │
-      ╰──────╯`,
+       ╭──────────╮
+       │  ★   ★   │
+       │    ▽     │
+       │   ◡◡◡    │
+       ╰──┬────┬──╯
+       ╭──┴────┴──╮
+       │  ╔════╗  │
+       │  ║ CACE║  │
+       │  ╚════╝  │
+       ╰────┬┬────╯
+        ╭───┘└───╮
+        │        │
+        ╰───┬┬───╯
+            ╭┘└╮`,
   // Frame 4: 超开心 + 举手
   `
-     ▄▄▄▄▄▄▄▄▄▄▄▄
-    █░░░░░░░░░░░░█
-    █░▄▄▄▄▄▄▄▄▄░█
-    █░│ ◉   ◉ │░█
-    █░│   ▽   │░█
-    █░│  ▽△▽  │░█
-    ╰────────────╯
-    ╭──╮──────╮╭──╮
-    │✊│ ▓▓▓▓ ││✊│
-    ╰──╯ ▓▓▓▓ ╰──╯
-         ╰──────╯
-        ╭─┴──┴─╮
-        │      │
-        ╰──────╯`,
+       ╭──────────╮
+       │  ◉   ◉   │
+       │    ▽     │
+       │   ▽△▽    │
+       ╰──┬────┬──╯
+    ╭──╮─┴────┴─╮──╮
+    │\\o/  ╔════╗ │\\o/
+    │     ║CACE║ │
+    ╰──╮  ╚════╝ ╭──╯
+       ╰────┬┬───╯
+        ╭───┘└───╮
+        │   ♪    │
+        ╰───┬┬───╯
+            ╭┘└╮`,
 ];
 
-// Small mascots for inline display
+// --- Inline mascot variants ---
+
 export const CACE_SMALL = `
-     ▄▄▄▄▄▄▄▄▄▄▄▄
-    █░▄▄▄▄▄▄▄▄▄░█
-    █░│ ●   ● │░█
-    █░│   ▽   │░█
-    █░│  ───  │░█
-    ╰────────────╯
-       ╭──────╮
-       │ ▓▓▓▓ │
-       ╰──────╯
-       ╭──┬──╮
-       │  │  │
-       ╰──┴──╯`;
+       ╭──────────╮
+       │  ●   ●   │
+       │    ▽     │
+       │   ───    │
+       ╰──┬────┬──╯
+       ╭──┴────┴──╮
+       │  ╔════╗  │
+       │  ║ CACE║  │
+       │  ╚════╝  │
+       ╰────┬┬────╯
+         ╭──┘└──╮
+         │      │
+         ╰──┬┬──╯
+           ╭┘└╮`;
 
 export const CACE_HAPPY = `
-     ▄▄▄▄▄▄▄▄▄▄▄▄
-    █░▄▄▄▄▄▄▄▄▄░█
-    █░│ ★   ★ │░█
-    █░│   ▽   │░█
-    █░│  ◡◡◡  │░█
-    ╰────────────╯
-       ╭──────╮
-       │ ▓▓▓▓ │
-       ╰──────╯
-      ╭─┴──┴─╮
-      │      │
-      ╰──────╯`;
+       ╭──────────╮
+       │  ★   ★   │
+       │    ▽     │
+       │   ◡◡◡    │
+       ╰──┬────┬──╯
+       ╭──┴────┴──╮
+       │  ╔════╗  │
+       │  ║ CACE║  │
+       │  ╚════╝  │
+       ╰────┬┬────╯
+        ╭───┘└───╮
+        │        │
+        ╰───┬┬───╯
+            ╭┘└╮`;
 
 export const CACE_SLEEPY = `
-     ▄▄▄▄▄▄▄▄▄▄▄▄
-    █░▄▄▄▄▄▄▄▄▄░█
-    █░│ ─   ─ │░█
-    █░│   ▽   │░█
-    █░│  ～～  │░█
-    ╰────────────╯
-       ╭──────╮
-       │ ▒▒▒▒ │
-       │ ▒▒▒▒ │
-       ╰──────╯
-       ╭──┬──╮
-       │  │  │
-       ╰──┴──╯`;
+       ╭──────────╮
+       │  ─   ─   │
+       │    ▽     │
+       │   ～～    │
+       ╰──┬────┬──╯
+       ╭──┴────┴──╮
+       │  ╔════╗  │
+       │  ║CACE║  │
+       │  ╚════╝  │
+       ╰────┬┬────╯
+         ╭──┘└──╮
+         │      │
+         ╰──┬┬──╯
+           ╭┘└╮`;
 
 export const CACE_FOCUSED = `
-     ▄▄▄▄▄▄▄▄▄▄▄▄
-    █░▄▄▄▄▄▄▄▄▄░█
-    █░│ ◆   ◆ │░█
-    █░│   ▽   │░█
-    █░│  ▬▬▬  │░█
-    ╰────────────╯
-       ╭──────╮
-       │ ▓▓▓▓ │
-       │ ▓▓▓▓ │
-       ╰──────╯
-       ╭──┬──╮
-       │  │  │
-       ╰──┴──╯`;
+       ╭──────────╮
+       │  ◆   ◆   │
+       │    ▽     │
+       │   ▬▬▬    │
+       ╰──┬────┬──╯
+       ╭──┴────┴──╮
+       │  ╔════╗  │
+       │  ║CACE║  │
+       │  ╚════╝  │
+       ╰────┬┬────╯
+         ╭──┘└──╮
+         │  ││  │
+         ╰──┬┬──╯
+           ╭┘└╮`;
 
 export const CACE_CELEBRATING = `
-     ▄▄▄▄▄▄▄▄▄▄▄▄
-    █░▄▄▄▄▄▄▄▄▄░█
-    █░│ ◉   ◉ │░█
-    █░│   ▽   │░█
-    █░│  ▽△▽  │░█
-    ╰────────────╯
-    ╭──╮──────╮╭──╮
-    │🎊│ ▓▓▓▓ ││🎊│
-    ╰──╯ ▓▓▓▓ ╰──╯
-         ╰──────╯
-        ╭─┴──┴─╮
-        │  ♪   │
-        ╰──────╯`;
+       ╭──────────╮
+       │  ◉   ◉   │
+       │    ▽     │
+       │   ▽△▽    │
+       ╰──┬────┬──╯
+    ╭──╮─┴────┴─╮──╮
+    │🎊  ╔════╗ │🎊
+    │    ║CACE║ │
+    ╰──╮ ╚════╝ ╭──╯
+       ╰────┬┬───╯
+        ╭───┘└───╮
+        │   ♪    │
+        ╰───┬┬───╯
+            ╭┘└╮`;
 
 export type CaceMood = 'normal' | 'happy' | 'sleepy' | 'focused' | 'celebrating';
+
+const MOOD_MAP: Record<CaceMood, string> = {
+  normal: CACE_SMALL,
+  happy: CACE_HAPPY,
+  sleepy: CACE_SLEEPY,
+  focused: CACE_FOCUSED,
+  celebrating: CACE_CELEBRATING,
+};
 
 export function getGreeting(): string {
   const hour = new Date().getHours();
@@ -160,20 +177,20 @@ export async function showCaceAnimation(message: string = ''): Promise<void> {
   const bold = '\x1b[1m';
   const reset = '\x1b[0m';
 
-  // Animation loop
-  for (let i = 0; i < 2; i++) {
+  // Animation: 3 cycles through frames for a smooth intro
+  for (let i = 0; i < 3; i++) {
     for (const frame of CACE_FRAMES) {
       console.clear();
       console.log(cyan + frame + reset);
       console.log();
-      console.log(cyan + bold + '  ════════════════════════════════' + reset);
-      console.log(cyan + bold + '       C A C E   T I M E R' + reset);
-      console.log(cyan + bold + '  ════════════════════════════════' + reset);
+      console.log(cyan + bold + '  ═══════════════════════════════════' + reset);
+      console.log(cyan + bold + '        C A C E   T I M E R' + reset);
+      console.log(cyan + bold + '  ═══════════════════════════════════' + reset);
       if (message) {
         console.log();
         console.log('  ' + message);
       }
-      await sleep(180);
+      await sleep(200);
     }
   }
 }
@@ -182,11 +199,7 @@ export function showCaceSmall(status: string = '', mood: CaceMood = 'normal'): v
   const cyan = '\x1b[36m';
   const reset = '\x1b[0m';
 
-  let face = CACE_SMALL;
-  if (mood === 'happy') face = CACE_HAPPY;
-  else if (mood === 'sleepy') face = CACE_SLEEPY;
-  else if (mood === 'focused') face = CACE_FOCUSED;
-  else if (mood === 'celebrating') face = CACE_CELEBRATING;
+  const face = MOOD_MAP[mood] || CACE_SMALL;
 
   console.log(cyan + face + reset);
   if (status) {
