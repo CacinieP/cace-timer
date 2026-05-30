@@ -1,6 +1,6 @@
 {
   "name": "@cacinie/cace-timer",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "A minimal time tracking CLI with cute anime girl mascot",
   "main": "dist/index.js",
   "bin": {
@@ -49,6 +49,7 @@
     "access": "public"
   },
   "devDependencies": {
+    "@types/blessed": "^0.1.27",
     "@types/node": "^20.10.0",
     "@typescript-eslint/eslint-plugin": "^8.60.0",
     "@typescript-eslint/parser": "^8.60.0",
@@ -59,5 +60,8 @@
     "typescript": "^5.3.0",
     "vitest": "^4.1.7"
   },
-  "types": "dist/index.d.ts"
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "blessed": "^0.1.81"
+  }
 }

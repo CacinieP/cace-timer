@@ -72,7 +72,7 @@ const CACE_FRAMES = [
 ];
 
 // Small mascots for inline display
-const CACE_SMALL = `
+export const CACE_SMALL = `
      ▄▄▄▄▄▄▄▄▄▄▄▄
     █░▄▄▄▄▄▄▄▄▄░█
     █░│ ●   ● │░█
@@ -86,7 +86,7 @@ const CACE_SMALL = `
        │  │  │
        ╰──┴──╯`;
 
-const CACE_HAPPY = `
+export const CACE_HAPPY = `
      ▄▄▄▄▄▄▄▄▄▄▄▄
     █░▄▄▄▄▄▄▄▄▄░█
     █░│ ★   ★ │░█
@@ -100,7 +100,7 @@ const CACE_HAPPY = `
       │      │
       ╰──────╯`;
 
-const CACE_SLEEPY = `
+export const CACE_SLEEPY = `
      ▄▄▄▄▄▄▄▄▄▄▄▄
     █░▄▄▄▄▄▄▄▄▄░█
     █░│ ─   ─ │░█
@@ -115,7 +115,7 @@ const CACE_SLEEPY = `
        │  │  │
        ╰──┴──╯`;
 
-const CACE_FOCUSED = `
+export const CACE_FOCUSED = `
      ▄▄▄▄▄▄▄▄▄▄▄▄
     █░▄▄▄▄▄▄▄▄▄░█
     █░│ ◆   ◆ │░█
@@ -130,7 +130,7 @@ const CACE_FOCUSED = `
        │  │  │
        ╰──┴──╯`;
 
-const CACE_CELEBRATING = `
+export const CACE_CELEBRATING = `
      ▄▄▄▄▄▄▄▄▄▄▄▄
     █░▄▄▄▄▄▄▄▄▄░█
     █░│ ◉   ◉ │░█

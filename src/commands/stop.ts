@@ -2,6 +2,8 @@ import { loadData, saveData, calculatePoints, scoreToLevel, pointsToNextLevel, u
 import { showCaceSmall } from '../mascot';
 import { formatDuration } from '../utils';
 import { t } from '../i18n';
+import { isInteractiveTerminal } from '../tui';
+import { showReflectionInput } from '../tui/reflection';
 
 export async function cmdStop(options?: { reflection?: string }): Promise<void> {
   const data = loadData();
@@ -29,9 +31,14 @@ export async function cmdStop(options?: { reflection?: string }): Promise<void> 
   const points = calculatePoints(durationMinutes, effForPoints);
   session.pointsEarned = points;
 
-  // Save reflection if provided
+  // Save reflection: CLI flag > TUI input > none
   if (options?.reflection) {
     session.reflection = options.reflection;
+  } else if (isInteractiveTerminal()) {
+    const result = await showReflectionInput();
+    if (result.text) {
+      session.reflection = result.text;
+    }
   }
 
   // Update score, streak

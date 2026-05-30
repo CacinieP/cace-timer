@@ -1,8 +1,10 @@
 import { loadData, saveData } from '../data';
-import { showCaceSmall } from '../mascot';
+import { showCaceSmall, CACE_FOCUSED, CACE_HAPPY } from '../mascot';
 import { generateId, formatDuration } from '../utils';
 import { t } from '../i18n';
 import { Session } from '../types';
+import { isInteractiveTerminal } from '../tui';
+import { showCountdown } from '../tui/countdown';
 
 function getRandomEncouragement(): string {
   const keys = [
@@ -103,7 +105,20 @@ export async function cmdPomodoro(
 
     console.log(`  ${t('cmd.pomodoro.round', { round: String(round), total: String(rounds) })} [${t('cmd.pomodoro.workPhase')}]`);
     console.log(`  ${getRandomEncouragement()}`);
-    await runCountdown(workMin * 60 * 1000);
+
+    if (isInteractiveTerminal()) {
+      // TUI countdown with mascot
+      await new Promise<void>(resolve => {
+        showCountdown({
+          totalMs: workMin * 60 * 1000,
+          label: `${t('cmd.pomodoro.round', { round: String(round), total: String(rounds) })} [${t('cmd.pomodoro.workPhase')}]`,
+          mascots: [CACE_FOCUSED, CACE_HAPPY],
+          onDone: resolve,
+        });
+      });
+    } else {
+      await runCountdown(workMin * 60 * 1000);
+    }
 
     // Stop work session
     workSession.end = new Date().toISOString();
