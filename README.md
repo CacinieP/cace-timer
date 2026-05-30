@@ -1,13 +1,23 @@
 # cace-timer
 
 [![npm version](https://img.shields.io/npm/v/@cacinie/cace-timer.svg)](https://www.npmjs.com/package/@cacinie/cace-timer)
+[![npm downloads](https://img.shields.io/npm/dm/@cacinie/cace-timer.svg)](https://www.npmjs.com/package/@cacinie/cace-timer)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D18-339933.svg)](package.json)
 [![license](https://img.shields.io/npm/l/@cacinie/cace-timer.svg)](https://github.com/CacinieP/cace-timer/blob/main/LICENSE)
 
-A minimal time tracking CLI with cute anime girl mascot.
+A minimal time-tracking CLI for people who want a fast terminal workflow, plain JSON data, and no account system.
 
 ```
 npm install -g @cacinie/cace-timer
 ```
+
+## Why cace-timer
+
+- **Fast capture**: start, mark, stop, and search from the terminal
+- **Local-first data**: one JSON file at `~/.cace-timer.json`
+- **Portable sync**: point the data file at Dropbox, iCloud, OneDrive, or any synced folder
+- **Estimate feedback**: compare actual time with your planned duration
+- **No dashboard lock-in**: easy to inspect, back up, or migrate
 
 ```
   ▄▄▄▄▄▄▄▄▄▄▄▄
