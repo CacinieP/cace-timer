@@ -7,11 +7,12 @@ type ScreenProgram = Screen['program'];
  * Single source of truth for tearing down a blessed screen without
  * leaving the parent TTY in a broken state.
  *
- * blessed calls `process.stdin.setRawMode(true)` on entry but never
- * restores it on `screen.destroy()` — leaving the user's terminal in
- * raw mode after Ctrl+C / quit. This helper runs the documented cleanup
- * chain (`screen.destroy` + raw-mode off + cursor reset) so every exit
- * path (Ctrl+C, q/Esc, timeout, callback throw) behaves the same.
+ * blessed calls `process.stdin.setRawMode(true)` on entry. Depending on
+ * the blessed version and the exact exit path, `screen.destroy()` does not
+ * always restore the parent TTY — leaving the user's terminal in raw mode
+ * after Ctrl+C / quit. This helper runs the documented cleanup chain
+ * (`screen.destroy` + raw-mode off + cursor reset) so every exit path
+ * (Ctrl+C, q/Esc, timeout, callback throw) behaves the same.
  *
  * Every cleanup step is wrapped in try/catch — screen may already be
  * destroyed (double-fire on race conditions), stdin may not be a TTY,

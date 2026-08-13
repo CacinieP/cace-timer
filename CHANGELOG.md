@@ -13,7 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - `src/__tests__/lifecycle.test.ts` — 11 unit tests for the helper covering happy path, non-TTY stdin, throwing destroy, throwing program methods, missing `normalCursor`, SIGINT/SIGTERM exit status, handler idempotency, and disposal.
 
 ### Fixed
-- **Terminal stays stuck in raw mode after quitting the TUI** (`P0-1`). Every blessed screen (countdown / dashboard / reflection) was calling `screen.destroy()` on exit but never restoring `process.stdin` raw mode or the cursor. blessed does not do this for you — the documented cleanup is up to the caller. After `q` / `Esc` / `Ctrl+C` in any TUI screen the parent shell would frequently get stuck in raw mode until the user ran `stty sane` or opened a new tab.
+- **Terminal stays stuck in raw mode after quitting the TUI** (`P0-1`). Some blessed versions / exit paths do not reliably restore `process.stdin` raw mode or the cursor after `screen.destroy()`. After `q` / `Esc` / `Ctrl+C` in a TUI screen the parent shell could get stuck in raw mode until the user ran `stty sane` or opened a new tab.
 - **Timer tick exceptions would leak the screen** (`P0-2`). The 500ms tick in `showCountdown` had no try/catch — any throw during render would leave the screen in raw mode. Now wrapped: cleanup runs, `onDone` is called, and the original error is re-thrown asynchronously so Node still reports it.
 
 ### Changed
