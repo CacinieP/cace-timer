@@ -4,6 +4,24 @@ All notable changes to cace-timer will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.3.0] - 2026-08-14
+
+### Added
+- `src/tui/lifecycle.ts` — central blessed screen teardown helper:
+  - `destroyScreen(screen)` runs `screen.destroy()` + `process.stdin.setRawMode(false)` + `screen.program.showCursor()` + `screen.program.normalCursor()`, each step wrapped in try/catch so partial failures don't leak (race / double-fire safe).
+  - `installSignalCleanup(screen)` installs SIGINT/SIGTERM handlers that run cleanup then re-raise the signal so process exit reflects user intent (130 / 143 instead of 0).
+- `src/__tests__/lifecycle.test.ts` — 10 unit tests for the helper covering happy path, non-TTY stdin, throwing destroy, throwing program methods, missing `normalCursor`, SIGINT/SIGTERM re-raise, and handler idempotency.
+
+### Fixed
+- **Terminal stays stuck in raw mode after quitting the TUI** (`P0-1`). Every blessed screen (countdown / dashboard / reflection) was calling `screen.destroy()` on exit but never restoring `process.stdin` raw mode or the cursor. blessed does not do this for you — the documented cleanup is up to the caller. After `q` / `Esc` / `Ctrl+C` in any TUI screen the parent shell would frequently get stuck in raw mode until the user ran `stty sane` or opened a new tab.
+- **Timer tick exceptions would leak the screen** (`P0-2`). The 500ms tick in `showCountdown` had no try/catch — any throw during render would leave the screen in raw mode. Now wrapped: cleanup runs, `onDone` is called, and the original error is re-thrown asynchronously so Node still reports it.
+
+### Changed
+- All TUI exit paths (`q` / `Esc` / `Ctrl+C` / menu keys / countdown completion / reflection submit) now route through `destroyScreen`.
+- `tk` (Pomodoro) Ctrl+C exit code: 0 → 130. Same convention as the parent shell's SIGINT. Scripts that chained `tk focus ... && next_step` will now correctly NOT run the next step when the user cancels the timer.
+- Pomodoro console-mode (`runCountdown`) Ctrl+C handler: `process.exit(0)` → `process.kill(pid, 'SIGINT')` (130 exit code, no blessed cleanup needed since this path is console-only).
+- `showCountdown` 500ms interval: `interval.unref()` so a stray timer can't keep the event loop alive after the screen is destroyed.
+
 ## [1.2.0] - 2026-05-31
 
 ### Added
