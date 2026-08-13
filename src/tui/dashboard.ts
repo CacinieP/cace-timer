@@ -1,8 +1,9 @@
 import blessed from 'blessed';
 import { loadData, scoreToLevel, pointsToNextLevel, getTodayStr } from '../data';
 import { CACE_FOCUSED, CACE_SLEEPY } from '../mascot';
-import { formatDuration, formatTime } from '../utils';
-import { t, getLocale } from '../i18n';
+import { formatDuration } from '../utils';
+import { t } from '../i18n';
+import { destroyScreen } from './lifecycle';
 
 export type DashboardAction =
   | 'start'
@@ -140,13 +141,13 @@ export function showDashboard(): Promise<DashboardAction> {
     screen.key([...allKeys], (ch: string) => {
       const item = menuItems.find(m => m.key === ch);
       if (item) {
-        screen.destroy();
+        destroyScreen(screen);
         resolve(item.action);
       }
     });
 
     screen.key(['escape', 'q', 'C-c'], () => {
-      screen.destroy();
+      destroyScreen(screen);
       resolve('quit');
     });
 

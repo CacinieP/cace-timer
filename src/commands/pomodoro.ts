@@ -56,12 +56,13 @@ function runCountdown(totalMs: number): Promise<void> {
       }
     }, 500);
 
-    // Handle Ctrl+C gracefully
+    // Handle Ctrl+C gracefully — exit 130 (SIGINT convention), not 0.
+    // runCountdown is console-only (no blessed), so no raw-mode cleanup
+    // needed here, but exit-code must reflect user intent.
     const onSigint = () => {
       clearInterval(interval);
       process.stdout.write('\n');
-      // Note: data is saved in the outer function's scope
-      process.exit(0);
+      process.kill(process.pid, 'SIGINT');
     };
     process.once('SIGINT', onSigint);
   });
