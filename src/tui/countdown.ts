@@ -1,5 +1,4 @@
 import blessed from 'blessed';
-import { t } from '../i18n';
 
 interface CountdownOptions {
   totalMs: number;
@@ -27,8 +26,8 @@ export function showCountdown(options: CountdownOptions): void {
     style: { fg: 'cyan' },
   });
 
-  // Label (round info)
-  const labelBox = blessed.box({
+  // Label (round info) — rendered as static content, no box ref needed
+  blessed.box({
     parent: screen,
     top: 16,
     left: 'center',
@@ -60,17 +59,6 @@ export function showCountdown(options: CountdownOptions): void {
     height: 1,
     align: 'center',
     style: { fg: 'white' },
-  });
-
-  // Encouragement
-  const encourageBox = blessed.box({
-    parent: screen,
-    bottom: 3,
-    left: 'center',
-    width: '100%',
-    height: 1,
-    align: 'center',
-    style: { fg: 'yellow' },
   });
 
   // Controls hint

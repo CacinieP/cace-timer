@@ -1,8 +1,8 @@
 import blessed from 'blessed';
 import { loadData, scoreToLevel, pointsToNextLevel, getTodayStr } from '../data';
 import { CACE_FOCUSED, CACE_SLEEPY } from '../mascot';
-import { formatDuration, formatTime } from '../utils';
-import { t, getLocale } from '../i18n';
+import { formatDuration } from '../utils';
+import { t } from '../i18n';
 
 export type DashboardAction =
   | 'start'
