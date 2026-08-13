@@ -94,6 +94,9 @@ export function showCountdown(options: CountdownOptions): void {
   const startTime = Date.now();
   const barWidth = 30;
 
+  // Clean up signal handlers when this screen closes normally.
+  const disposeSignalCleanup = installSignalCleanup(screen);
+
   // Update timer every 500ms
   const interval = setInterval(() => {
     let elapsed = 0;
@@ -128,6 +131,7 @@ export function showCountdown(options: CountdownOptions): void {
       // Render or content error — don't leave the screen half-updated.
       // Tear down with cleanup, then surface the error to the caller.
       clearInterval(interval);
+      disposeSignalCleanup();
       destroyScreen(screen);
       options.onDone();
       // Re-throw asynchronously so Node reports it instead of swallowing it.
@@ -139,6 +143,7 @@ export function showCountdown(options: CountdownOptions): void {
 
     if (elapsed >= options.totalMs) {
       clearInterval(interval);
+      disposeSignalCleanup();
       process.stdout.write('\x07'); // bell
       destroyScreen(screen);
       options.onDone();
@@ -148,7 +153,6 @@ export function showCountdown(options: CountdownOptions): void {
   if (typeof interval.unref === 'function') interval.unref();
 
   // Handle Ctrl+C — exit code 130, blessed cleanup included.
-  installSignalCleanup(screen);
   screen.key(['C-c'], () => {
     clearInterval(interval);
     process.stdout.write('\n');

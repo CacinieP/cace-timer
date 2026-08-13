@@ -127,39 +127,44 @@ describe('destroyScreen', () => {
 
 describe('installSignalCleanup', () => {
   afterEach(() => {
+    vi.restoreAllMocks();
     // Restore default signal handlers so other tests aren't affected.
     process.removeAllListeners('SIGINT');
     process.removeAllListeners('SIGTERM');
   });
 
-  it('re-raises SIGINT after cleanup', () => {
+  it('exits 130 for SIGINT after cleanup', () => {
     const screen = makeFakeScreen();
-    const kill = vi.spyOn(process, 'kill').mockImplementation(() => true);
+    const exit = vi
+      .spyOn(process, 'exit')
+      .mockImplementation((() => undefined) as never);
 
     installSignalCleanup(screen);
     process.emit('SIGINT');
 
     expect(screen.destroy).toHaveBeenCalledTimes(1);
-    expect(kill).toHaveBeenCalledWith(process.pid, 'SIGINT');
-    kill.mockRestore();
+    expect(exit).toHaveBeenCalledWith(130);
   });
 
-  it('re-raises SIGTERM after cleanup', () => {
+  it('exits 143 for SIGTERM after cleanup', () => {
     const screen = makeFakeScreen();
-    const kill = vi.spyOn(process, 'kill').mockImplementation(() => true);
+    const exit = vi
+      .spyOn(process, 'exit')
+      .mockImplementation((() => undefined) as never);
 
     installSignalCleanup(screen);
     process.emit('SIGTERM');
 
     expect(screen.destroy).toHaveBeenCalledTimes(1);
-    expect(kill).toHaveBeenCalledWith(process.pid, 'SIGTERM');
-    kill.mockRestore();
+    expect(exit).toHaveBeenCalledWith(143);
   });
 
   it('is idempotent — installing twice replaces the previous handler', () => {
     const screen1 = makeFakeScreen();
     const screen2 = makeFakeScreen();
-    const kill = vi.spyOn(process, 'kill').mockImplementation(() => true);
+    const exit = vi
+      .spyOn(process, 'exit')
+      .mockImplementation((() => undefined) as never);
 
     installSignalCleanup(screen1);
     installSignalCleanup(screen2);
@@ -168,6 +173,20 @@ describe('installSignalCleanup', () => {
     // screen1 should NOT have been destroyed — its handler was replaced.
     expect(screen1.destroy).not.toHaveBeenCalled();
     expect(screen2.destroy).toHaveBeenCalledTimes(1);
-    kill.mockRestore();
+    expect(exit).toHaveBeenCalledWith(130);
+  });
+
+  it('dispose() removes the signal handlers', () => {
+    const screen = makeFakeScreen();
+    const exit = vi
+      .spyOn(process, 'exit')
+      .mockImplementation((() => undefined) as never);
+
+    const dispose = installSignalCleanup(screen);
+    dispose();
+    process.emit('SIGINT');
+
+    expect(screen.destroy).not.toHaveBeenCalled();
+    expect(exit).not.toHaveBeenCalled();
   });
 });

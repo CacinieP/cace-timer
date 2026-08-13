@@ -52,24 +52,39 @@ export function destroyScreen(screen: Screen): void {
   }
 }
 
-/**
- * Install a one-shot SIGINT/SIGTERM handler that runs the standard
- * blessed cleanup and then re-raises the signal so process exit
- * reflects the user's intent (exit 130 for SIGINT, 143 for SIGTERM).
- *
- * Idempotent: calling twice replaces the previous handler.
- */
-export function installSignalCleanup(screen: Screen): void {
-  const cleanup = (signal: NodeJS.Signals): void => {
-    destroyScreen(screen);
-    // Re-raise so default exit-code semantics apply (130/143).
-    // Remove our handler first so we don't recurse.
-    process.removeAllListeners(signal);
-    process.kill(process.pid, signal);
-  };
-  process.removeAllListeners('SIGINT');
-  process.removeAllListeners('SIGTERM');
-  process.once('SIGINT', () => cleanup('SIGINT'));
-  process.once('SIGTERM', () => cleanup('SIGTERM'));
-}
+let activeDispose: (() => void) | undefined;
 
+/**
+ * Install SIGINT/SIGTERM handlers that run the standard blessed cleanup
+ * and then exit with the conventional signal status (130 / 143).
+ *
+ * Returns a `dispose()` function so callers can remove the handlers when
+ * the screen is closed normally. Installing again while a previous
+ * instance is active disposes that instance first (idempotent replace).
+ */
+export function installSignalCleanup(screen: Screen): () => void {
+  activeDispose?.();
+
+  const cleanup = (signal: NodeJS.Signals): void => {
+    dispose();
+    destroyScreen(screen);
+    const code = signal === 'SIGINT' ? 130 : signal === 'SIGTERM' ? 143 : 1;
+    process.exit(code);
+  };
+
+  const onSigint = (): void => cleanup('SIGINT');
+  const onSigterm = (): void => cleanup('SIGTERM');
+  const dispose = (): void => {
+    process.removeListener('SIGINT', onSigint);
+    process.removeListener('SIGTERM', onSigterm);
+    if (activeDispose === dispose) {
+      activeDispose = undefined;
+    }
+  };
+
+  process.on('SIGINT', onSigint);
+  process.on('SIGTERM', onSigterm);
+  activeDispose = dispose;
+
+  return dispose;
+}
