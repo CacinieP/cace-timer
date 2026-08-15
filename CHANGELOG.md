@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 ## [1.3.2] - 2026-08-16
 
 ### Fixed
-- **Mascot redesign — now an actual chibi girl**. The old art (box head + glass-case torso with a CACE plaque) read as a robot, and had systematic misalignments: jagged CACE box (6/7/6 cols per row), off-center eyes, feet connectors one column off from the legs. New figure: bob-cut hair with side walls and inward chin curl, ahoge, visible neck, A-line dress (14→18 cols) with CACE embroidered in an aligned 8-col box, legs + feet — every ┬┴┘└ connector verified column-by-column around the center line. `focused` mood gets a stiff antenna hair; `celebrating` swaps emoji confetti for terminal-safe ASCII hands (`o\ … /o`). README cover art updated to match.
+- **Mascot redesign — now an actual chibi girl**. The old art (box head + glass-case torso with a CACE plaque) read as a robot, and had systematic misalignments: jagged CACE box (6/7/6 cols per row), off-center eyes, feet connectors one column off from the legs. New figure: round face (dome + closed hairline as hair volume + full bangs fringe + closed jaw), double hair buns on the dome corners, visible neck threading through chin ┬┬ and collar ┴┴, A-line dress with CACE embroidered in an aligned 8-col box, little hands tucked at the waist, separate legs with closed boots. Every contour is a closed loop and every ┬┴┘└ connector is verified programmatically by the new `align_check.ts` dev tool (connectivity + mirror symmetry around the 13/14 center line). Moods: `happy`/`celebrating` jump with a wide stance (celebrating floats a ♪); `celebrating` no longer relies on emoji confetti (terminal emoji-width drift). README cover art updated to match.
 
 ## [1.3.1] - 2026-08-16
 
