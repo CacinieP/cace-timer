@@ -23,7 +23,7 @@ function check(name: string, art: string): void {
   const probs: string[] = [];
   const rowType = (r: number): { face: boolean; neck: boolean; bangs: boolean; chin: boolean; faceWall: boolean } => {
     const t = lines[r] ?? '';
-    const faceWall = t[7] === '│' && t[20] === '│' && !t.includes('╔') && !t.includes('╰') && !t.includes('┴');
+    const faceWall = t[6] === '│' && t[21] === '│' && !t.includes('╔') && !t.includes('╰') && !t.includes('┴');
     return { face: FACE.test(t), neck: /^\s*││\s*$/.test(t), bangs: t.includes('╭╮╭╮'), chin: t.includes('╰──╯'), faceWall };
   };
   for (let r = 0; r < lines.length; r++) {
