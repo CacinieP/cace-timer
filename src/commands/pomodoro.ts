@@ -52,17 +52,19 @@ function runCountdown(totalMs: number): Promise<void> {
       if (elapsed >= totalMs) {
         clearInterval(interval);
         process.stdout.write('\n');
+        process.removeListener('SIGINT', onSigint);
         resolve();
       }
     }, 500);
 
-    // Handle Ctrl+C gracefully
-    const onSigint = () => {
+    // Handle Ctrl+C gracefully — exit 130 (SIGINT convention), not 0.
+    // runCountdown is console-only (no blessed), so no raw-mode cleanup
+    // needed here, but exit-code must reflect user intent.
+    function onSigint(): void {
       clearInterval(interval);
       process.stdout.write('\n');
-      // Note: data is saved in the outer function's scope
-      process.exit(0);
-    };
+      process.exit(130);
+    }
     process.once('SIGINT', onSigint);
   });
 }

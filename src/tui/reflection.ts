@@ -1,5 +1,6 @@
 import blessed from 'blessed';
 import { t } from '../i18n';
+import { destroyScreen } from './lifecycle';
 
 interface ReflectionResult {
   text: string;
@@ -58,17 +59,17 @@ export function showReflectionInput(): Promise<ReflectionResult> {
 
     input.key('enter', () => {
       const text = input.getValue().trim();
-      screen.destroy();
+      destroyScreen(screen);
       resolve({ text });
     });
 
     input.key('escape', () => {
-      screen.destroy();
+      destroyScreen(screen);
       resolve({ text: '' });
     });
 
     screen.key(['C-c'], () => {
-      screen.destroy();
+      destroyScreen(screen);
       resolve({ text: '' });
     });
 
