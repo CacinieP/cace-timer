@@ -1,5 +1,5 @@
 import blessed from 'blessed';
-import { t } from '../i18n';
+import { destroyScreen, installSignalCleanup } from './lifecycle';
 
 interface CountdownOptions {
   totalMs: number;
@@ -27,8 +27,8 @@ export function showCountdown(options: CountdownOptions): void {
     style: { fg: 'cyan' },
   });
 
-  // Label (round info)
-  const labelBox = blessed.box({
+  // Label (round info) — rendered as static content, no box ref needed
+  blessed.box({
     parent: screen,
     top: 16,
     left: 'center',
@@ -62,17 +62,6 @@ export function showCountdown(options: CountdownOptions): void {
     style: { fg: 'white' },
   });
 
-  // Encouragement
-  const encourageBox = blessed.box({
-    parent: screen,
-    bottom: 3,
-    left: 'center',
-    width: '100%',
-    height: 1,
-    align: 'center',
-    style: { fg: 'yellow' },
-  });
-
   // Controls hint
   blessed.box({
     parent: screen,
@@ -93,48 +82,70 @@ export function showCountdown(options: CountdownOptions): void {
   const startTime = Date.now();
   const barWidth = 30;
 
+  // Clean up signal handlers when this screen closes normally.
+  const disposeSignalCleanup = installSignalCleanup(screen);
+
   // Update timer every 500ms
   const interval = setInterval(() => {
-    const elapsed = Date.now() - startTime;
-    const remaining = Math.max(0, options.totalMs - elapsed);
-    const progress = Math.min(1, elapsed / options.totalMs);
+    let elapsed = 0;
+    let remaining = 0;
+    try {
+      elapsed = Date.now() - startTime;
+      remaining = Math.max(0, options.totalMs - elapsed);
+      const progress = Math.min(1, elapsed / options.totalMs);
 
-    // Format time
-    const totalSec = Math.floor(remaining / 1000);
-    const min = Math.floor(totalSec / 60);
-    const sec = totalSec % 60;
-    const timeStr = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+      // Format time
+      const totalSec = Math.floor(remaining / 1000);
+      const min = Math.floor(totalSec / 60);
+      const sec = totalSec % 60;
+      const timeStr = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
 
-    // Progress bar
-    const filled = Math.floor(progress * barWidth);
-    const bar = '█'.repeat(filled) + '░'.repeat(barWidth - filled);
-    const pct = Math.floor(progress * 100);
+      // Progress bar
+      const filled = Math.floor(progress * barWidth);
+      const bar = '█'.repeat(filled) + '░'.repeat(barWidth - filled);
+      const pct = Math.floor(progress * 100);
 
-    timerBox.setContent(`  ${timeStr}  `);
-    progressLabel.setContent(`[${bar}] ${pct}%`);
+      timerBox.setContent(`  ${timeStr}  `);
+      progressLabel.setContent(`[${bar}] ${pct}%`);
 
-    // Rotate mascot expression
-    if (options.mascots.length > 1) {
-      const idx = Math.floor(progress * options.mascots.length) % options.mascots.length;
-      mascotBox.setContent(options.mascots[idx]);
+      // Rotate mascot expression
+      if (options.mascots.length > 1) {
+        const idx = Math.floor(progress * options.mascots.length) % options.mascots.length;
+        mascotBox.setContent(options.mascots[idx]);
+      }
+
+      screen.render();
+    } catch (err) {
+      // Render or content error — don't leave the screen half-updated.
+      // Tear down with cleanup, then surface the error to the caller.
+      clearInterval(interval);
+      disposeSignalCleanup();
+      destroyScreen(screen);
+      options.onDone();
+      // Re-throw asynchronously so Node reports it instead of swallowing it.
+      setImmediate(() => {
+        throw err;
+      });
+      return;
     }
-
-    screen.render();
 
     if (elapsed >= options.totalMs) {
       clearInterval(interval);
-      screen.destroy();
+      disposeSignalCleanup();
       process.stdout.write('\x07'); // bell
+      destroyScreen(screen);
       options.onDone();
     }
   }, 500);
+  // Don't keep the event loop alive just for the timer.
+  if (typeof interval.unref === 'function') interval.unref();
 
-  // Handle Ctrl+C
+  // Handle Ctrl+C — exit code 130, blessed cleanup included.
   screen.key(['C-c'], () => {
     clearInterval(interval);
-    screen.destroy();
     process.stdout.write('\n');
-    process.exit(0);
+    destroyScreen(screen);
+    process.kill(process.pid, 'SIGINT');
   });
 
   screen.render();

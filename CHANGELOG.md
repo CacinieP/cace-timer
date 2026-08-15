@@ -4,7 +4,7 @@ All notable changes to cace-timer will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
-## [1.2.5] - 2026-08-14
+## [1.3.1] - 2026-08-16
 
 ### Added
 - `docs/ARCHITECTURE.md` — internal architecture overview (module layout, TUI screen responsibilities, exit paths, data flow)
@@ -12,6 +12,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Notes
 - Documentation-only release. No code changes; no behavior change.
+
+## [1.3.0] - 2026-08-14
+
+### Added
+- `src/tui/lifecycle.ts` — central blessed screen teardown helper:
+  - `destroyScreen(screen)` runs `screen.destroy()` + `process.stdin.setRawMode(false)` + `screen.program.showCursor()` + `screen.program.normalCursor()`, each step wrapped in try/catch so partial failures don't leak (race / double-fire safe).
+  - `installSignalCleanup(screen)` installs SIGINT/SIGTERM handlers that run cleanup then exit with the conventional signal status (130 / 143 instead of 0). It returns a `dispose()` function so normal screen completion can remove the handlers.
+- `src/__tests__/lifecycle.test.ts` — 11 unit tests for the helper covering happy path, non-TTY stdin, throwing destroy, throwing program methods, missing `normalCursor`, SIGINT/SIGTERM exit status, handler idempotency, and disposal.
+
+### Fixed
+- **Terminal stays stuck in raw mode after quitting the TUI** (`P0-1`). Some blessed versions / exit paths do not reliably restore `process.stdin` raw mode or the cursor after `screen.destroy()`. After `q` / `Esc` / `Ctrl+C` in a TUI screen the parent shell could get stuck in raw mode until the user ran `stty sane` or opened a new tab.
+- **Timer tick exceptions would leak the screen** (`P0-2`). The 500ms tick in `showCountdown` had no try/catch — any throw during render would leave the screen in raw mode. Now wrapped: cleanup runs, `onDone` is called, and the original error is re-thrown asynchronously so Node still reports it.
+
+### Changed
+- All TUI exit paths (`q` / `Esc` / `Ctrl+C` / menu keys / countdown completion / reflection submit) now route through `destroyScreen`.
+- `tk` (Pomodoro) Ctrl+C exit code: 0 → 130. Same convention as the parent shell's SIGINT. Scripts that chained `tk focus ... && next_step` will now correctly NOT run the next step when the user cancels the timer.
+- Pomodoro console-mode (`runCountdown`) Ctrl+C handler: `process.exit(0)` → `process.exit(130)` (130 exit code, no blessed cleanup needed since this path is console-only).
+- `showCountdown` 500ms interval: `interval.unref()` so a stray timer can't keep the event loop alive after the screen is destroyed.
+- `showCountdown` now disposes its SIGINT/SIGTERM handlers when the timer completes normally or errors, so a finished TUI cannot leak stale signal handlers into later console-mode phases.
 
 ## [1.2.4] - 2026-05-31
 

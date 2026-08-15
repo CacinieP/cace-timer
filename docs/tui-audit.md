@@ -3,7 +3,7 @@
 > 对内文档。配套阅读 [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)。
 
 - 仓库: <https://github.com/CacinieP/cace-timer>
-- 提交: `cace-timer@1.2.5`(本地 clone,基于 `main`)
+- 提交: `cace-timer@1.2.4`(本地 clone,基于 `main`)
 - 审计范围: `src/tui/*` + 调用方(`src/index.ts`、`src/commands/{pomodoro,stop}.ts`)
 - 工具栈: Node ≥ 18, blessed ^0.1.81, TypeScript strict, vitest, eslint
 - 基线状态: ✅ 30/30 测试通过,✅ `tsc --noEmit` 0 错,⚠ lint 8 warnings(全部在 TUI/相关模块)
