@@ -2,7 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@cacinie/cace-timer.svg)](https://www.npmjs.com/package/@cacinie/cace-timer)
 [![npm downloads](https://img.shields.io/npm/dm/@cacinie/cace-timer.svg)](https://www.npmjs.com/package/@cacinie/cace-timer)
-[![Node.js](https://img.shields.io/badge/node-%3E%3D18-339933.svg)](package.json)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D20-339933.svg)](package.json)
 [![license](https://img.shields.io/npm/l/@cacinie/cace-timer.svg)](https://github.com/CacinieP/cace-timer/blob/main/LICENSE)
 
 A gamified time-tracking CLI with an interactive TUI dashboard, points & levels, and a cute mascot.
@@ -268,7 +268,7 @@ MIT
 
 [![npm version](https://img.shields.io/npm/v/@cacinie/cace-timer.svg)](https://www.npmjs.com/package/@cacinie/cace-timer)
 [![npm downloads](https://img.shields.io/npm/dm/@cacinie/cace-timer.svg)](https://www.npmjs.com/package/@cacinie/cace-timer)
-[![Node.js](https://img.shields.io/badge/node-%3E%3D18-339933.svg)](package.json)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D20-339933.svg)](package.json)
 [![license](https://img.shields.io/npm/l/@cacinie/cace-timer.svg)](https://github.com/CacinieP/cace-timer/blob/main/LICENSE)
 
 游戏化时间追踪 CLI，带交互式 TUI 仪表盘、积分等级系统和可爱吉祥物。
