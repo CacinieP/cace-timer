@@ -16,12 +16,17 @@ Design constraints:
 
 - Teal bob, cowlick, star clip, delicate round glasses, large bright eyes and bow.
 - No nose or hands; one-cell mouth; hair carries the chibi head volume.
-- Cheeks gently taper inward into a small rounded chin. Keep the same jaw for
+- Cheeks retain gentle fullness and taper inward into a rounded chin. Keep the same jaw for
   all expressions. Avoid the reference's long flat chin line.
 - Move the whole head for tilted expressions. Keep the mouth and eye anchors
   stable during a blink; no string-by-string centering.
 - Retain all 16 original expression names. Compact and tiny art simplify
   expression details while keeping textual status visible.
+
+Version 1.4.1 incorporates the follow-up “脸太瘦了”: full and compact faces are
+one column wider on each side throughout the lower contour. This restores cheek
+and jaw fullness while preserving the centre, eye/mouth anchors and rounded
+corners. Tiny art and the outer hair silhouette remain unchanged.
 
 Art is TypeScript data in `src/mascot/assets/mint.ts`. `frames.ts` supplies
 fixed canvases and semantic colour spans; the full canvas is 38×17, compact

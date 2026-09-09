@@ -22,7 +22,7 @@ describe('MINT artwork', () => {
     },
   );
 
-  it('keeps the slim jaw fixed between expressions, including whole-head tilts', () => {
+  it('keeps the balanced rounded jaw fixed between expressions, including whole-head tilts', () => {
     const baseline = getFrame().rows.slice(10, 14);
     const shape = (rows: typeof baseline): string[] =>
       rows.map((row) =>
@@ -34,14 +34,14 @@ describe('MINT artwork', () => {
     for (const item of EXPRESSIONS)
       expect(shape(getFrame({ expression: item.key }).rows.slice(10, 14))).toEqual(shape(baseline));
     const plain = plainFrame(getFrame()).split('\n');
-    expect(plain[10].indexOf('(')).toBe(11);
-    expect(plain[10].indexOf(')')).toBe(21);
-    expect(plain[13]).toContain('╰───╯');
+    expect(plain[10].indexOf('(')).toBe(10);
+    expect(plain[10].indexOf(')')).toBe(22);
+    expect(plain[13]).toContain('╰─────╯');
     expect(plain[13]).not.toContain('_______');
     const compact = plainFrame(getFrame({ size: 'compact' })).split('\n');
-    expect(compact[6].indexOf('(')).toBe(8);
-    expect(compact[6].indexOf(')')).toBe(14);
-    expect(compact[8]).toContain('╰─╯');
+    expect(compact[6].indexOf('(')).toBe(7);
+    expect(compact[6].indexOf(')')).toBe(15);
+    expect(compact[8]).toContain('╰───╯');
   });
 
   it('blinks without moving any other row, then restores the original frame', () => {

@@ -4,6 +4,14 @@ All notable changes to cace-timer will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.4.1] - 2026-09-09
+
+### Fixed
+- Restore gentle cheek fullness after feedback that the 1.4.0 face was too thin.
+  Full and compact contours expand one column on each side through the cheek,
+  jaw and rounded chin, keeping the centre, canvas and expression anchors fixed.
+- Update the README portrait and existing contour regression expectations.
+
 ## [1.4.0] - 2026-09-09
 
 ### Added
