@@ -1,6 +1,6 @@
 {
   "name": "@cacinie/cace-timer",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Local-first time tracking CLI with a responsive MINT character dashboard",
   "main": "dist/index.js",
   "bin": {

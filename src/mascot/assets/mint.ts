@@ -7,6 +7,7 @@ export const DARK_PALETTE = {
   e: 'b2f4d5',
   p: 'dba4b1',
   s: 'e6d5c4',
+  c: '99958b', // Soft lower contour; recedes behind eyes and cheeks.
   g: '82989e',
   w: 'd5e7e3',
   d: '6f8b8c',
@@ -17,6 +18,7 @@ export const LIGHT_PALETTE = {
   e: '276849',
   p: 'a04b6b',
   s: '866049',
+  c: 'ab9b8b',
   g: '5b6572',
   w: '526764',
   d: '687776',
@@ -35,8 +37,8 @@ export const FULL = [
   "{h}      |:|{g} '---'   '---' {h}|:|",
   '{h}      |:| {s}({p}//       //{s}) {h}|:|',
   '{h}      \\:\\  {s}\\    ᴗ    /  {h}/:/',
-  '{h}       \\_\\  {s}\\       /  {h}/_/',
-  "{m}         '--'{s}╰─────╯{m}'--'",
+  '{h}       \\_\\  {c}\\       /  {h}/_/',
+  "{m}         '--'{c}`.___.'{m}'--'",
   '{g}             .-{s}\\_/{g}-.',
   '{g}            /  {p}>o<{g}  \\',
   "{g}            '-------'",
@@ -49,8 +51,8 @@ export const COMPACT = [
   '{h}     /ﾉノ ヽﾊ{p}*   {h}\\',
   '{g}    ({h}|:{g}({e}◕ﾟ{g})-({e}◕ﾟ{g}){h}:|{g})',
   '{h}     |:{s}({p}//   //{s}){h}:|',
-  '{h}     \\:{s} \\  ᴗ  / {h}:/',
-  "{h}      '- {s}╰───╯ {h}-'",
+  '{h}     \\:{c} \\  {s}ᴗ  {c}/ {h}:/',
+  "{h}      '- {c}`._.' {h}-'",
   '{g}        / {p}>o<{g} \\',
   "{g}        '-----'",
 ] as const;
@@ -58,7 +60,7 @@ export const TINY = [
   '{h}  .---.',
   '{g} ({h}|{e}o-o{h}|{g})',
   '{h}  \\{s} v {h}/',
-  "{s}   '-'",
+  "{c}   '-'",
   '{g}   /{p}><{g}\\',
 ] as const;
 export const EXPRESSIONS = [

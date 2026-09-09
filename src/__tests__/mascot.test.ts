@@ -27,7 +27,7 @@ describe('MINT artwork', () => {
     const shape = (rows: typeof baseline): string[] =>
       rows.map((row) =>
         row
-          .filter((span) => span.role === 's')
+          .filter((span) => span.role === 's' || span.role === 'c')
           .map((span) => span.text.replace(/[ᴗoｰv3~]/g, '.'))
           .join(''),
       );
@@ -36,12 +36,12 @@ describe('MINT artwork', () => {
     const plain = plainFrame(getFrame()).split('\n');
     expect(plain[10].indexOf('(')).toBe(10);
     expect(plain[10].indexOf(')')).toBe(22);
-    expect(plain[13]).toContain('╰─────╯');
+    expect(plain[13]).toContain("`.___.'");
     expect(plain[13]).not.toContain('_______');
     const compact = plainFrame(getFrame({ size: 'compact' })).split('\n');
     expect(compact[6].indexOf('(')).toBe(7);
     expect(compact[6].indexOf(')')).toBe(15);
-    expect(compact[8]).toContain('╰───╯');
+    expect(compact[8]).toContain("`._.'");
   });
 
   it('blinks without moving any other row, then restores the original frame', () => {

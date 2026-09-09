@@ -4,6 +4,14 @@ All notable changes to cace-timer will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.4.2] - 2026-09-09
+
+### Changed
+- Soften the chin with sparse punctuation and a short baseline instead of a
+  continuous box-drawing contour. Fade the lower jaw using a muted skin-contour
+  colour in both palettes, preserving the 1.4.1 face width and expression anchors.
+- Keep the softened outline in ASCII exports; tiny art uses the muted colour.
+
 ## [1.4.1] - 2026-09-09
 
 ### Fixed

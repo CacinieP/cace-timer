@@ -59,8 +59,8 @@ function asciiText(value: string): string {
 function spans(row: string, ascii: boolean): Span[] {
   let role: ColorRole = 'w';
   const result: Span[] = [];
-  for (const part of row.split(/(\{[hmespgwd]\})/)) {
-    if (/^\{[hmespgwd]\}$/.test(part)) role = part[1] as ColorRole;
+  for (const part of row.split(/(\{[hmespgwdc]\})/)) {
+    if (/^\{[hmespgwdc]\}$/.test(part)) role = part[1] as ColorRole;
     else if (part) result.push({ role, text: ascii ? asciiText(part) : part });
   }
   return result;

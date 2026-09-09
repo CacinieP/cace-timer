@@ -20,7 +20,7 @@ npm install -g @cacinie/cace-timer
     (|:(O')-(O'):|)
      |:(//   //):|
      \: \  v  / :/
-      '- \___/ -'
+      '- `._.' -'
         / >o< \
         '-----'
        CACE TIMER

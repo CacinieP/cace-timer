@@ -28,6 +28,13 @@ one column wider on each side throughout the lower contour. This restores cheek
 and jaw fullness while preserving the centre, eye/mouth anchors and rounded
 corners. Tiny art and the outer hair silhouette remain unchanged.
 
+Version 1.4.2 responds to “柔和虚化下巴线条”. The lower contour uses a muted
+skin-colour role `c` in both palettes. Punctuation and a short baseline suggest
+the chin without the continuous box-drawing corners. This is a terminal-native
+low-contrast treatment, with the same 1.4.1 face width and stable expression
+anchors; it does not blur raster images. ASCII keeps the sparse contour, and
+tiny art adopts the muted colour.
+
 Art is TypeScript data in `src/mascot/assets/mint.ts`. `frames.ts` supplies
 fixed canvases and semantic colour spans; the full canvas is 38×17, compact
 22×11 and tiny 8×5 under the default one-cell ambiguous-width policy. Wider
