@@ -1,3 +1,4 @@
+import { paint } from '../terminal';
 import * as fs from 'fs';
 import * as path from 'path';
 import { loadData, saveData } from '../data';
@@ -6,7 +7,7 @@ import { t } from '../i18n';
 
 export function cmdSync(filePath: string): void {
   if (!filePath || filePath.trim() === '') {
-    console.log(`\x1b[33m${t('cmd.sync.emptyPath')}\x1b[0m`);
+    console.log(paint(`${t('cmd.sync.emptyPath')}`, 'yellow'));
     return;
   }
 
@@ -15,7 +16,7 @@ export function cmdSync(filePath: string): void {
   const parentDir = path.dirname(absPath);
 
   if (!fs.existsSync(parentDir)) {
-    console.log(`\x1b[33m${t('cmd.sync.dirNotExist', { dir: parentDir })}\x1b[0m`);
+    console.log(paint(`${t('cmd.sync.dirNotExist', { dir: parentDir })}`, 'yellow'));
     return;
   }
 

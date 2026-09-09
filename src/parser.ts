@@ -5,6 +5,18 @@ export interface ParsedArgs {
   options: Record<string, string | boolean | string[]>;
 }
 
+const BOOLEAN_OPTIONS = new Set([
+  'no-animation',
+  'no-tui',
+  'ascii',
+  'all',
+  'animate',
+  'today',
+  'week',
+  'month',
+  'last',
+]);
+
 export function parseArgs(args: string[]): ParsedArgs {
   const result: ParsedArgs = {
     command: '',
@@ -20,7 +32,7 @@ export function parseArgs(args: string[]): ParsedArgs {
       const key = arg.slice(2);
       const nextArg = args[i + 1];
 
-      if (nextArg && !nextArg.startsWith('-')) {
+      if (!BOOLEAN_OPTIONS.has(key) && nextArg && !nextArg.startsWith('-')) {
         // Support repeated flags: accumulate into array
         const existing = result.options[key];
         if (Array.isArray(existing)) {

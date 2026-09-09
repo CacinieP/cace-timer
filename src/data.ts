@@ -58,10 +58,7 @@ export function saveData(data: TimeKeeperData): void {
 // ============ Scoring & Streak ============
 
 /** Calculate points earned for a completed session */
-export function calculatePoints(
-  durationMinutes: number,
-  efficiency: number,
-): number {
+export function calculatePoints(durationMinutes: number, efficiency: number): number {
   let points = 10; // base points
   if (efficiency >= 80) points += 5; // efficiency bonus
   if (efficiency >= 100) points += 5; // perfect bonus
@@ -91,7 +88,6 @@ export function pointsToNextLevel(score: number): { current: number; needed: num
   for (let i = 1; i < level; i++) {
     totalForCurrent += i * 20;
   }
-  const totalForNext = totalForCurrent + level * 20;
   return {
     current: score - totalForCurrent,
     needed: level * 20,

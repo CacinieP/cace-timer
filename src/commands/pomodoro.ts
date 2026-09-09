@@ -1,5 +1,6 @@
+import { paint } from '../terminal';
 import { loadData, saveData } from '../data';
-import { showCaceSmall, CACE_FOCUSED, CACE_HAPPY } from '../mascot';
+import { showCaceSmall } from '../mascot';
 import { generateId, formatDuration } from '../utils';
 import { t } from '../i18n';
 import { Session } from '../types';
@@ -8,22 +9,24 @@ import { showCountdown } from '../tui/countdown';
 
 function getRandomEncouragement(): string {
   const keys = [
-    'cmd.focus.encourage1', 'cmd.focus.encourage2', 'cmd.focus.encourage3',
-    'cmd.focus.encourage4', 'cmd.focus.encourage5', 'cmd.focus.encourage6',
+    'cmd.focus.encourage1',
+    'cmd.focus.encourage2',
+    'cmd.focus.encourage3',
+    'cmd.focus.encourage4',
+    'cmd.focus.encourage5',
+    'cmd.focus.encourage6',
   ];
   return t(keys[Math.floor(Math.random() * keys.length)]);
 }
 
-function normalizeTags(
-  rawTag: string | string[] | undefined,
-): string[] {
+function normalizeTags(rawTag: string | string[] | undefined): string[] {
   if (Array.isArray(rawTag)) {
-    return rawTag.flatMap(tg => tg.split(',').map(s => s.trim())).filter(Boolean);
+    return rawTag.flatMap((tg) => tg.split(',').map((s) => s.trim())).filter(Boolean);
   }
   if (typeof rawTag === 'string') {
     return rawTag
       .split(',')
-      .map(s => s.trim())
+      .map((s) => s.trim())
       .filter(Boolean);
   }
   return [];
@@ -37,18 +40,19 @@ function formatMsAsClock(ms: number): string {
 }
 
 function runCountdown(totalMs: number): Promise<void> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const startTime = Date.now();
     const barWidth = 20;
     const interval = setInterval(() => {
       const elapsed = Date.now() - startTime;
-      const remaining = Math.max(0, totalMs - elapsed);
       const progress = Math.min(1, elapsed / totalMs);
       const filled = Math.floor(progress * barWidth);
       const bar = '█'.repeat(filled) + '░'.repeat(barWidth - filled);
       const elapsedStr = formatMsAsClock(elapsed);
       const totalStr = formatMsAsClock(totalMs);
-      process.stdout.write(`\r  [${bar}] ${elapsedStr} / ${totalStr}   `);
+      if (process.stdout.isTTY && process.env.TERM !== 'dumb') {
+        process.stdout.write(`\r  [${bar}] ${elapsedStr} / ${totalStr}   `);
+      }
       if (elapsed >= totalMs) {
         clearInterval(interval);
         process.stdout.write('\n');
@@ -76,7 +80,7 @@ export async function cmdPomodoro(
   const data = loadData();
 
   if (data.current) {
-    console.log(`\x1b[33m⚠ ${t('common.alreadyActive')}\x1b[0m`);
+    console.log(paint(`⚠ ${t('common.alreadyActive')}`, 'yellow'));
     return;
   }
 
@@ -105,19 +109,22 @@ export async function cmdPomodoro(
     data.current = workSession;
     saveData(data);
 
-    console.log(`  ${t('cmd.pomodoro.round', { round: String(round), total: String(rounds) })} [${t('cmd.pomodoro.workPhase')}]`);
+    console.log(
+      `  ${t('cmd.pomodoro.round', { round: String(round), total: String(rounds) })} [${t('cmd.pomodoro.workPhase')}]`,
+    );
     console.log(`  ${getRandomEncouragement()}`);
 
     if (isInteractiveTerminal()) {
       // TUI countdown with mascot
-      await new Promise<void>(resolve => {
-        showCountdown({
-          totalMs: workMin * 60 * 1000,
-          label: `${t('cmd.pomodoro.round', { round: String(round), total: String(rounds) })} [${t('cmd.pomodoro.workPhase')}]`,
-          mascots: [CACE_FOCUSED, CACE_HAPPY],
-          onDone: resolve,
-        });
+      const completed = await showCountdown({
+        totalMs: workMin * 60 * 1000,
+        label: `${task} / ${t('cmd.pomodoro.round', { round: String(round), total: String(rounds) })}`,
       });
+      if (!completed) {
+        console.log(t('tui.cancelled'));
+        process.exitCode = 130;
+        return;
+      }
     } else {
       await runCountdown(workMin * 60 * 1000);
     }
@@ -129,7 +136,7 @@ export async function cmdPomodoro(
     totalWorkMs += workMin * 60 * 1000;
     saveData(data);
 
-    process.stdout.write('\x07'); // bell
+    if (process.stdout.isTTY && process.env.TERM !== 'dumb') process.stdout.write('\x07');
     showCaceSmall(t('cmd.pomodoro.workDone'), 'happy');
     console.log();
 
@@ -138,7 +145,7 @@ export async function cmdPomodoro(
       console.log(`  ${t('cmd.pomodoro.breakTime')}`);
       await runCountdown(breakMin * 60 * 1000);
       totalBreakMs += breakMin * 60 * 1000;
-      process.stdout.write('\x07');
+      if (process.stdout.isTTY && process.env.TERM !== 'dumb') process.stdout.write('\x07');
       showCaceSmall(t('cmd.pomodoro.breakDone'), 'normal');
       console.log();
     }

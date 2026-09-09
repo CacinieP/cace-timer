@@ -1,152 +1,66 @@
 import blessed from 'blessed';
+import { t } from '../i18n';
+import { getDisplay } from '../terminal';
 import { destroyScreen, installSignalCleanup } from './lifecycle';
+import { RefreshLoop, startRefreshLoop } from './animation';
+import { createSurface } from './surface';
 
-interface CountdownOptions {
+export interface CountdownOptions {
   totalMs: number;
   label: string;
-  mascots: string[];
-  onDone: () => void;
 }
 
-export function showCountdown(options: CountdownOptions): void {
-  const screen = blessed.screen({
-    smartCSR: true,
-    title: 'CACE TIMER',
-    fullUnicode: true,
-  });
-
-  // Mascot display
-  const mascotBox = blessed.box({
-    parent: screen,
-    top: 0,
-    left: 'center',
-    width: '100%',
-    height: 16,
-    align: 'center',
-    valign: 'middle',
-    style: { fg: 'cyan' },
-  });
-
-  // Label (round info) — rendered as static content, no box ref needed
-  blessed.box({
-    parent: screen,
-    top: 16,
-    left: 'center',
-    width: '100%',
-    height: 1,
-    align: 'center',
-    style: { fg: 'white', bold: true },
-    content: options.label,
-  });
-
-  // Timer display
-  const timerBox = blessed.box({
-    parent: screen,
-    top: 18,
-    left: 'center',
-    width: '100%',
-    height: 3,
-    align: 'center',
-    valign: 'middle',
-    style: { fg: 'cyan', bold: true },
-  });
-
-  // Progress bar container
-  const progressLabel = blessed.box({
-    parent: screen,
-    top: 22,
-    left: 'center',
-    width: '100%',
-    height: 1,
-    align: 'center',
-    style: { fg: 'white' },
-  });
-
-  // Controls hint
-  blessed.box({
-    parent: screen,
-    bottom: 0,
-    left: 'center',
-    width: '100%',
-    height: 1,
-    align: 'center',
-    style: { fg: 'gray' },
-    content: 'Ctrl+C to stop',
-  });
-
-  // Draw mascot
-  if (options.mascots.length > 0) {
-    mascotBox.setContent(options.mascots[0]);
-  }
-
-  const startTime = Date.now();
-  const barWidth = 30;
-
-  // Clean up signal handlers when this screen closes normally.
-  const disposeSignalCleanup = installSignalCleanup(screen);
-
-  // Update timer every 500ms
-  const interval = setInterval(() => {
-    let elapsed = 0;
-    let remaining = 0;
-    try {
-      elapsed = Date.now() - startTime;
-      remaining = Math.max(0, options.totalMs - elapsed);
-      const progress = Math.min(1, elapsed / options.totalMs);
-
-      // Format time
-      const totalSec = Math.floor(remaining / 1000);
-      const min = Math.floor(totalSec / 60);
-      const sec = totalSec % 60;
-      const timeStr = `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
-
-      // Progress bar
-      const filled = Math.floor(progress * barWidth);
-      const bar = '█'.repeat(filled) + '░'.repeat(barWidth - filled);
-      const pct = Math.floor(progress * 100);
-
-      timerBox.setContent(`  ${timeStr}  `);
-      progressLabel.setContent(`[${bar}] ${pct}%`);
-
-      // Rotate mascot expression
-      if (options.mascots.length > 1) {
-        const idx = Math.floor(progress * options.mascots.length) % options.mascots.length;
-        mascotBox.setContent(options.mascots[idx]);
-      }
-
-      screen.render();
-    } catch (err) {
-      // Render or content error — don't leave the screen half-updated.
-      // Tear down with cleanup, then surface the error to the caller.
-      clearInterval(interval);
-      disposeSignalCleanup();
+// Resolve false on cancellation; reject on render failure. Neither path is a
+// completed timer, so callers must not archive a successful work session.
+export function showCountdown(options: CountdownOptions): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    const screen = blessed.screen({ smartCSR: true, title: 'CACE TIMER', fullUnicode: true });
+    const surface = createSurface(screen);
+    let loop: RefreshLoop | undefined = undefined;
+    let settled = false;
+    const disposeSignals = installSignalCleanup(screen);
+    screen.once('destroy', () => {
+      loop?.dispose();
+      disposeSignals();
+    });
+    const finish = (completed: boolean, error?: unknown): void => {
+      if (settled) return;
+      settled = true;
+      loop?.dispose();
       destroyScreen(screen);
-      options.onDone();
-      // Re-throw asynchronously so Node reports it instead of swallowing it.
-      setImmediate(() => {
-        throw err;
-      });
-      return;
-    }
-
-    if (elapsed >= options.totalMs) {
-      clearInterval(interval);
-      disposeSignalCleanup();
-      process.stdout.write('\x07'); // bell
-      destroyScreen(screen);
-      options.onDone();
-    }
-  }, 500);
-  // Don't keep the event loop alive just for the timer.
-  if (typeof interval.unref === 'function') interval.unref();
-
-  // Handle Ctrl+C — exit code 130, blessed cleanup included.
-  screen.key(['C-c'], () => {
-    clearInterval(interval);
-    process.stdout.write('\n');
-    destroyScreen(screen);
-    process.kill(process.pid, 'SIGINT');
+      if (error !== undefined) reject(error);
+      else resolve(completed);
+    };
+    screen.key(['escape', 'q'], () => finish(false));
+    screen.key(['C-c'], () => process.emit('SIGINT'));
+    screen.on('resize', () => loop?.refresh());
+    loop = startRefreshLoop(
+      (elapsed) => {
+        if (elapsed >= options.totalMs) {
+          finish(true);
+          return;
+        }
+        const remaining = Math.max(0, options.totalMs - elapsed);
+        const totalSeconds = Math.ceil(remaining / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        const progress = Math.min(1, elapsed / options.totalMs);
+        const width = Math.max(1, Math.min(28, Number(screen.width) - 8));
+        const filled = Math.floor(width * progress);
+        const bar = '[' + '='.repeat(filled) + '-'.repeat(width - filled) + ']';
+        const lines = [
+          options.label,
+          `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`,
+          `${bar} ${Math.floor(progress * 100)}%`,
+          '',
+          t('tui.oneThing'),
+        ];
+        surface.render('little_smile', elapsed, lines, t('tui.cancel'));
+      },
+      (error) => finish(false, error),
+      getDisplay().animation ? 100 : 200,
+    );
+    // A zero-duration timer can finish during the first synchronous render.
+    if (settled) loop.dispose();
   });
-
-  screen.render();
 }

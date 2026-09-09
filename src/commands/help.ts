@@ -64,6 +64,11 @@ export function cmdHelp(): void {
   console.log(`     ${t('cmd.help.focusDesc')}`);
   console.log();
   console.log(`  ${t('cmd.help.lang')}`);
+  console.log(`  ${t('cmd.help.display')}`);
+  console.log('     --no-animation  --no-tui  --ascii');
+  console.log('     --color auto|always|256|never  --theme dark|light');
+  console.log('  tk mascot preview [--all] [--expression <name>] [--size full|compact|tiny]');
+  console.log(`     ${t('mascot.help')}`);
   console.log();
   console.log(`  ${t('cmd.help.help')}`);
   console.log(`     ${t('cmd.help.helpDesc')}`);

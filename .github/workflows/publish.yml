@@ -15,7 +15,10 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - run: npm ci
       - run: npm run build
+      - run: npm run lint
       - run: npm test
+      - run: node --test scripts/cli-smoke.cjs
+      - run: python3 scripts/pty-smoke.py
       - run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

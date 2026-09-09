@@ -1,3 +1,4 @@
+import { paint } from '../terminal';
 import { Mark } from '../types';
 import { loadData, saveData } from '../data';
 import { showCaceSmall } from '../mascot';
@@ -8,7 +9,7 @@ export async function cmdMark(note: string): Promise<void> {
   const data = loadData();
 
   if (!data.current) {
-    console.log(`\x1b[33m⚠ ${t('cmd.mark.noActive')}\x1b[0m`);
+    console.log(paint(`⚠ ${t('cmd.mark.noActive')}`, 'yellow'));
     return;
   }
 

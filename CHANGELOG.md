@@ -4,6 +4,49 @@ All notable changes to cace-timer will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [1.4.2] - 2026-09-09
+
+### Changed
+- Soften the chin with sparse punctuation and a short baseline instead of a
+  continuous box-drawing contour. Fade the lower jaw using a muted skin-contour
+  colour in both palettes, preserving the 1.4.1 face width and expression anchors.
+- Keep the softened outline in ASCII exports; tiny art uses the muted colour.
+
+## [1.4.1] - 2026-09-09
+
+### Fixed
+- Restore gentle cheek fullness after feedback that the 1.4.0 face was too thin.
+  Full and compact contours expand one column on each side through the cheek,
+  jaw and rounded chin, keeping the centre, canvas and expression anchors fixed.
+- Update the README portrait and existing contour regression expectations.
+
+## [1.4.0] - 2026-09-09
+
+### Added
+- MINT character artwork: 16 full expressions, a slimmer rounded jaw, semantic
+  dark/light palettes, compact/tiny variants and printable ASCII fallbacks.
+- `tk mascot preview` with expression navigation and static exports.
+- `--no-animation`, `--no-tui`, `--ascii`, `--color` and `--theme` display options.
+- Artwork/column/animation tests, built CLI smoke tests and a POSIX PTY suite
+  covering resize, signals, cancellation, renderer failure and terminal recovery.
+
+### Changed
+- Dashboard and countdown adapt to terminal dimensions and update only when
+  their content changes. Blinking is independent of task timing.
+- Start/resume feedback prints immediately instead of clearing the screen and
+  waiting through a 2.4-second intro. Redirected output contains no auto-colour
+  escapes, cursor operations or repeated progress redraws.
+- Reflection uses the shared signal cleanup; Ctrl+C aborts completion.
+
+### Fixed
+- Artwork no longer exceeds hardcoded 13/16-line display regions.
+- Rendering failures reject instead of invoking a success callback.
+- Cancelling a countdown never archives it as completed; exit statuses are
+  130 for cancellation, 143 for SIGTERM and 1 for rendering errors.
+- A completed interactive round rings once, not twice.
+- Boolean display switches can precede a command without consuming its name.
+- Existing unused-variable lint warnings removed.
+
 ## [1.3.2] - 2026-08-16
 
 ### Fixed
