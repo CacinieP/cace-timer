@@ -1,225 +1,22 @@
-import { sleep } from './utils';
 import { t } from './i18n';
-
-// ============ CACE TIMER Mascot ============
-// 可爱短发小女孩 — 完整身体设计
-// 人设参考: 语码 Cace — 译者 + Vibe Coder + 电音/VOCALOID 宅
-// 特征: 呆毛 + 齐耳 Bob 短发 + 尖下巴 + A 字裙(CACE 绣在裙面)
-// 动画帧用于开场动画，各 mood 用于内联显示
-// 对齐约定: 中心线在 13/14 列之间,所有 ┬┴┘└ 连接点逐列对齐
-
-const CACE_FRAMES = [
-  // Frame 1: 正常站立
-  `
-     ╭─╮            ╭─╮
-     ╰─╯            ╰─╯
-       ╭────────────╮
-      ╭┴────────────┴╮
-      │   ╭╮╭╮╭╮╭╮   │
-      │    ●    ●    │
-      │      ▽       │
-      │     ───      │
-      ╰──────┬┬──────╯
-             ││
-       ╭─────┴┴─────╮
-      ╭╯  ╔══════╗  ╰╮
-     o│   ║ CACE ║   │o
-      │   ╚══════╝   │
-      ╰────┬────┬────╯
-           │    │
-           │    │
-           │    │
-          ╭┴╮  ╭┴╮
-          ╰─╯  ╰─╯`,
-  // Frame 2: 眨眼
-  `
-     ╭─╮            ╭─╮
-     ╰─╯            ╰─╯
-       ╭────────────╮
-      ╭┴────────────┴╮
-      │   ╭╮╭╮╭╮╭╮   │
-      │    ─    ─    │
-      │      ▽       │
-      │     ───      │
-      ╰──────┬┬──────╯
-             ││
-       ╭─────┴┴─────╮
-      ╭╯  ╔══════╗  ╰╮
-     o│   ║ CACE ║   │o
-      │   ╚══════╝   │
-      ╰────┬────┬────╯
-           │    │
-           │    │
-           │    │
-          ╭┴╮  ╭┴╮
-          ╰─╯  ╰─╯`,
-  // Frame 3: 微笑蹦跳
-  `
-     ╭─╮            ╭─╮
-     ╰─╯            ╰─╯
-       ╭────────────╮
-      ╭┴────────────┴╮
-      │   ╭╮╭╮╭╮╭╮   │
-      │    ★    ★    │
-      │      ▽       │
-      │     ◡◡◡      │
-      ╰──────┬┬──────╯
-             ││
-       ╭─────┴┴─────╮
-      ╭╯  ╔══════╗  ╰╮
-     o│   ║ CACE ║   │o
-      │   ╚══════╝   │
-      ╰────┬────┬────╯
-       ╭───┘    └───╮
-       │            │
-       │            │
-      ╭┴╮          ╭┴╮
-      ╰─╯          ╰─╯`,
-  // Frame 4: 超开心 + 举手
-  `
-  ♪  ╭─╮            ╭─╮
-     ╰─╯            ╰─╯
-       ╭────────────╮
-      ╭┴────────────┴╮
-      │   ╭╮╭╮╭╮╭╮   │
-      │    ◉    ◉    │
-      │      ▽       │
-      │     ▽△▽      │
-      ╰──────┬┬──────╯
-             ││
-       ╭─────┴┴─────╮
-      ╭╯  ╔══════╗  ╰╮
-     o│   ║ CACE ║   │o
-      │   ╚══════╝   │
-      ╰────┬────┬────╯
-       ╭───┘    └───╮
-       │            │
-       │            │
-      ╭┴╮          ╭┴╮
-      ╰─╯          ╰─╯`,
-];
-
-// --- Inline mascot variants ---
-
-export const CACE_SMALL = `
-     ╭─╮            ╭─╮
-     ╰─╯            ╰─╯
-       ╭────────────╮
-      ╭┴────────────┴╮
-      │   ╭╮╭╮╭╮╭╮   │
-      │    ●    ●    │
-      │      ▽       │
-      │     ───      │
-      ╰──────┬┬──────╯
-             ││
-       ╭─────┴┴─────╮
-      ╭╯  ╔══════╗  ╰╮
-     o│   ║ CACE ║   │o
-      │   ╚══════╝   │
-      ╰────┬────┬────╯
-           │    │
-           │    │
-           │    │
-          ╭┴╮  ╭┴╮
-          ╰─╯  ╰─╯`;
-
-export const CACE_HAPPY = `
-     ╭─╮            ╭─╮
-     ╰─╯            ╰─╯
-       ╭────────────╮
-      ╭┴────────────┴╮
-      │   ╭╮╭╮╭╮╭╮   │
-      │    ★    ★    │
-      │      ▽       │
-      │     ◡◡◡      │
-      ╰──────┬┬──────╯
-             ││
-       ╭─────┴┴─────╮
-      ╭╯  ╔══════╗  ╰╮
-     o│   ║ CACE ║   │o
-      │   ╚══════╝   │
-      ╰────┬────┬────╯
-       ╭───┘    └───╮
-       │            │
-       │            │
-      ╭┴╮          ╭┴╮
-      ╰─╯          ╰─╯`;
-
-export const CACE_SLEEPY = `
-     ╭─╮            ╭─╮
-     ╰─╯            ╰─╯
-       ╭────────────╮
-      ╭┴────────────┴╮
-      │   ╭╮╭╮╭╮╭╮   │
-      │    ─    ─    │
-      │      ▽       │
-      │      ～～      │
-      ╰──────┬┬──────╯
-             ││
-       ╭─────┴┴─────╮
-      ╭╯  ╔══════╗  ╰╮
-     o│   ║ CACE ║   │o
-      │   ╚══════╝   │
-      ╰────┬────┬────╯
-           │    │
-           │    │
-           │    │
-          ╭┴╮  ╭┴╮
-          ╰─╯  ╰─╯`;
-
-export const CACE_FOCUSED = `
-     ╭─╮            ╭─╮
-     ╰─╯            ╰─╯
-       ╭────────────╮
-      ╭┴────────────┴╮
-      │   ╭╮╭╮╭╮╭╮   │
-      │    ◆    ◆    │
-      │      ▽       │
-      │     ▬▬▬      │
-      ╰──────┬┬──────╯
-             ││
-       ╭─────┴┴─────╮
-      ╭╯  ╔══════╗  ╰╮
-     o│   ║ CACE ║   │o
-      │   ╚══════╝   │
-      ╰────┬────┬────╯
-           │    │
-           │    │
-           │    │
-          ╭┴╮  ╭┴╮
-          ╰─╯  ╰─╯`;
-
-export const CACE_CELEBRATING = `
-  ♪  ╭─╮            ╭─╮
-     ╰─╯            ╰─╯
-       ╭────────────╮
-      ╭┴────────────┴╮
-      │   ╭╮╭╮╭╮╭╮   │
-      │    ◉    ◉    │
-      │      ▽       │
-      │     ▽△▽      │
-      ╰──────┬┬──────╯
-             ││
-       ╭─────┴┴─────╮
-      ╭╯  ╔══════╗  ╰╮
-     o│   ║ CACE ║   │o
-      │   ╚══════╝   │
-      ╰────┬────┬────╯
-       ╭───┘    └───╮
-       │            │
-       │            │
-      ╭┴╮          ╭┴╮
-      ╰─╯          ╰─╯`;
+import { getDisplay, fitText } from './terminal';
+import { getFrame, plainFrame, renderFrame } from './mascot/frames';
+import { Expression } from './mascot/assets/mint';
 
 export type CaceMood = 'normal' | 'happy' | 'sleepy' | 'focused' | 'celebrating';
-
-const MOOD_MAP: Record<CaceMood, string> = {
-  normal: CACE_SMALL,
-  happy: CACE_HAPPY,
-  sleepy: CACE_SLEEPY,
-  focused: CACE_FOCUSED,
-  celebrating: CACE_CELEBRATING,
+const MOOD_MAP: Record<CaceMood, Expression> = {
+  normal: 'little_smile',
+  happy: 'happy',
+  sleepy: 'asleep',
+  focused: 'little_smile',
+  celebrating: 'excited',
 };
+
+export const CACE_SMALL = plainFrame(getFrame({ size: 'compact' }));
+export const CACE_HAPPY = plainFrame(getFrame({ expression: 'happy' }));
+export const CACE_SLEEPY = plainFrame(getFrame({ expression: 'asleep' }));
+export const CACE_FOCUSED = plainFrame(getFrame());
+export const CACE_CELEBRATING = plainFrame(getFrame({ expression: 'excited' }));
 
 export function getGreeting(): string {
   const hour = new Date().getHours();
@@ -229,37 +26,17 @@ export function getGreeting(): string {
   return t('greeting.evening');
 }
 
-export async function showCaceAnimation(message: string = ''): Promise<void> {
-  const cyan = '\x1b[36m';
-  const bold = '\x1b[1m';
-  const reset = '\x1b[0m';
-
-  // Animation: 3 cycles through frames for a smooth intro
-  for (let i = 0; i < 3; i++) {
-    for (const frame of CACE_FRAMES) {
-      console.clear();
-      console.log(cyan + frame + reset);
-      console.log();
-      console.log(cyan + bold + '  ═══════════════════════════════════' + reset);
-      console.log(cyan + bold + '        C A C E   T I M E R' + reset);
-      console.log(cyan + bold + '  ═══════════════════════════════════' + reset);
-      if (message) {
-        console.log();
-        console.log('  ' + message);
-      }
-      await sleep(200);
-    }
-  }
+// One-shot commands return promptly. Continuous motion belongs to a TUI screen
+// with a lifecycle, not a clear/sleep loop inside task mutations.
+export async function showCaceAnimation(message = ''): Promise<void> {
+  showCaceSmall(message);
 }
 
-export function showCaceSmall(status: string = '', mood: CaceMood = 'normal'): void {
-  const cyan = '\x1b[36m';
-  const reset = '\x1b[0m';
-
-  const face = MOOD_MAP[mood] || CACE_SMALL;
-
-  console.log(cyan + face + reset);
-  if (status) {
-    console.log(cyan + '  ' + status + reset);
-  }
+export function showCaceSmall(status = '', mood: CaceMood = 'normal'): void {
+  const display = getDisplay();
+  const columns = process.stdout.columns ?? 80;
+  const size = columns >= 22 && (process.stdout.rows ?? 24) >= 18 ? 'compact' : 'tiny';
+  const frame = getFrame({ expression: MOOD_MAP[mood], size, ascii: display.ascii });
+  if (columns >= frame.width) console.log(renderFrame(frame, display));
+  if (status) console.log(fitText(status, columns));
 }

@@ -1,6 +1,6 @@
 import { loadData } from '../data';
 import { showCaceSmall } from '../mascot';
-import { formatDuration, formatDate } from '../utils';
+import { formatDuration } from '../utils';
 import { t } from '../i18n';
 import { Session } from '../types';
 
@@ -19,7 +19,7 @@ function computeDailyHours(sessions: Session[], days: number): DayHours[] {
     const dayEnd = new Date(day);
     dayEnd.setDate(dayEnd.getDate() + 1);
     const daySessions = sessions.filter(
-      s => s.start >= day.toISOString() && s.start < dayEnd.toISOString(),
+      (s) => s.start >= day.toISOString() && s.start < dayEnd.toISOString(),
     );
     const totalMs = daySessions.reduce(
       (acc, s) => acc + (new Date(s.end!).getTime() - new Date(s.start).getTime()),
@@ -46,32 +46,32 @@ export function cmdSummary(options: {
   tag?: string;
 }): void {
   const data = loadData();
-  const allCompleted = data.history.filter(s => s.end); // all completed, for daily chart
+  const allCompleted = data.history.filter((s) => s.end); // all completed, for daily chart
   let sessions = allCompleted;
 
   // Time filtering
   const now = new Date();
   if (options.today) {
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-    sessions = sessions.filter(s => s.start >= todayStart);
+    sessions = sessions.filter((s) => s.start >= todayStart);
   } else if (options.week) {
     // Start from Monday
     const dayOfWeek = now.getDay(); // 0=Sun, 1=Mon...
     const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
     const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - mondayOffset);
-    sessions = sessions.filter(s => s.start >= weekStart.toISOString());
+    sessions = sessions.filter((s) => s.start >= weekStart.toISOString());
   } else if (options.month) {
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-    sessions = sessions.filter(s => s.start >= monthStart);
+    sessions = sessions.filter((s) => s.start >= monthStart);
   } else {
     // Default to today
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-    sessions = sessions.filter(s => s.start >= todayStart);
+    sessions = sessions.filter((s) => s.start >= todayStart);
   }
 
   // Tag filtering
   if (options.tag) {
-    sessions = sessions.filter(s => s.tags.includes(options.tag!));
+    sessions = sessions.filter((s) => s.tags.includes(options.tag!));
   }
 
   console.log();
@@ -83,9 +83,7 @@ export function cmdSummary(options: {
 
   // Compute stats
   const totalSessions = sessions.length;
-  const durations = sessions.map(
-    s => new Date(s.end!).getTime() - new Date(s.start).getTime(),
-  );
+  const durations = sessions.map((s) => new Date(s.end!).getTime() - new Date(s.start).getTime());
   const totalDuration = durations.reduce((a, b) => a + b, 0);
   const avgDuration = totalDuration / totalSessions;
 
@@ -136,7 +134,7 @@ export function cmdSummary(options: {
 
   // Daily bar chart
   console.log(`  ${t('cmd.summary.dailyHours')} (${t('cmd.summary.dailyHoursLabel')}):`);
-  const maxHours = Math.max(...dailyHours.map(d => d.hours), 1);
+  const maxHours = Math.max(...dailyHours.map((d) => d.hours), 1);
   for (const day of dailyHours) {
     const barWidth = Math.round((day.hours / maxHours) * 20);
     const bar = '█'.repeat(barWidth);

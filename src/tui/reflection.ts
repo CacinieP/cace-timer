@@ -1,18 +1,21 @@
 import blessed from 'blessed';
 import { t } from '../i18n';
-import { destroyScreen } from './lifecycle';
+import { destroyScreen, installSignalCleanup } from './lifecycle';
+import { safeText } from '../terminal';
 
 interface ReflectionResult {
   text: string;
 }
 
 export function showReflectionInput(): Promise<ReflectionResult> {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const screen = blessed.screen({
       smartCSR: true,
       title: 'CACE TIMER',
       fullUnicode: true,
     });
+    const disposeSignals = installSignalCleanup(screen);
+    screen.once('destroy', disposeSignals);
 
     // Title
     blessed.box({
@@ -58,7 +61,7 @@ export function showReflectionInput(): Promise<ReflectionResult> {
     input.focus();
 
     input.key('enter', () => {
-      const text = input.getValue().trim();
+      const text = safeText(input.getValue()).trim();
       destroyScreen(screen);
       resolve({ text });
     });
@@ -69,8 +72,7 @@ export function showReflectionInput(): Promise<ReflectionResult> {
     });
 
     screen.key(['C-c'], () => {
-      destroyScreen(screen);
-      resolve({ text: '' });
+      process.emit('SIGINT');
     });
 
     screen.render();

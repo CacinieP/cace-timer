@@ -1,9 +1,11 @@
 import blessed from 'blessed';
-import { loadData, scoreToLevel, pointsToNextLevel, getTodayStr } from '../data';
-import { CACE_FOCUSED, CACE_SLEEPY } from '../mascot';
+import { loadData, scoreToLevel, getTodayStr } from '../data';
 import { formatDuration } from '../utils';
 import { t } from '../i18n';
-import { destroyScreen } from './lifecycle';
+import { getDisplay } from '../terminal';
+import { destroyScreen, installSignalCleanup } from './lifecycle';
+import { RefreshLoop, startRefreshLoop } from './animation';
+import { createSurface } from './surface';
 
 export type DashboardAction =
   | 'start'
@@ -16,141 +18,86 @@ export type DashboardAction =
   | 'quit';
 
 export function showDashboard(): Promise<DashboardAction> {
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     const data = loadData();
-
-    // Refresh streak display (don't mutate saved data here)
-    let displayStreak = data.streak || 0;
-    const today = getTodayStr();
-    if (data.lastActiveDate && data.lastActiveDate !== today) {
-      const last = new Date(data.lastActiveDate);
-      const now = new Date(today);
-      const diff = Math.floor((now.getTime() - last.getTime()) / 86400000);
-      if (diff > 1) displayStreak = 0;
-    }
-
-    const level = scoreToLevel(data.score || 0);
-    const prog = pointsToNextLevel(data.score || 0);
-
-    const screen = blessed.screen({
-      smartCSR: true,
-      title: 'CACE TIMER',
-      fullUnicode: true,
+    const screen = blessed.screen({ smartCSR: true, title: 'CACE TIMER', fullUnicode: true });
+    const surface = createSurface(screen);
+    let loop: RefreshLoop | undefined = undefined;
+    let settled = false;
+    const disposeSignals = installSignalCleanup(screen);
+    screen.once('destroy', () => {
+      loop?.dispose();
+      disposeSignals();
     });
-
-    // Mascot
-    const mascotContent = data.current ? CACE_FOCUSED : CACE_SLEEPY;
-    blessed.box({
-      parent: screen,
-      top: 0,
-      left: 'center',
-      width: 46,
-      height: 13,
-      align: 'center',
-      valign: 'top',
-      style: { fg: 'cyan' },
-      content: mascotContent,
-    });
-
-    // Level / Score / Streak bar
-    const streakStr =
-      displayStreak > 1
-        ? t('score.streakFire', { days: String(displayStreak) })
-        : displayStreak === 1
-          ? t('score.newStreak')
-          : t('cmd.status.noStreak');
-
-    const progFilled = Math.min(20, Math.round((prog.current / Math.max(1, prog.needed)) * 20));
-    const progressBar = '█'.repeat(progFilled) + '░'.repeat(20 - progFilled);
-
-    blessed.box({
-      parent: screen,
-      top: 13,
-      left: 'center',
-      width: '100%',
-      height: 3,
-      align: 'center',
-      style: { fg: 'yellow', bold: true },
-      content: ` ${t('cmd.status.level', { level: String(level), score: String(data.score || 0) })}  |  ${streakStr}\n ${progressBar} ${t('score.progress', { current: String(prog.current), needed: String(prog.needed) })}`,
-    });
-
-    // Active task panel
-    const hasActive = !!data.current;
-    const menuTop = hasActive ? 18 : 17;
-
-    if (hasActive && data.current) {
-      const elapsed = Date.now() - new Date(data.current.start).getTime();
-      const taskInfo = data.current;
-      blessed.box({
-        parent: screen,
-        top: 16,
-        left: '10%',
-        width: '80%',
-        height: 2,
-        align: 'center',
-        border: { type: 'line' },
-        style: { fg: 'green', border: { fg: 'green' } },
-        content: ` ${t('cmd.status.inProgress')}: ${taskInfo.task} | ${t('cmd.mark.elapsed')}: ${formatDuration(elapsed)}`,
-      });
-    }
-
-    // Menu items - context-dependent
-    const menuItems: { key: string; label: string; action: DashboardAction }[] = hasActive
+    const finish = (action: DashboardAction): void => {
+      if (settled) return;
+      settled = true;
+      loop?.dispose();
+      destroyScreen(screen);
+      resolve(action);
+    };
+    const fail = (error: unknown): void => {
+      if (settled) return;
+      settled = true;
+      loop?.dispose();
+      destroyScreen(screen);
+      reject(error);
+    };
+    const menu: { key: string; label: string; action: DashboardAction }[] = data.current
       ? [
-          { key: 'm', label: `📍 ${t('cmd.mark.markPoint')}`, action: 'mark' },
-          { key: 's', label: `⏹  ${t('cmd.help.stopDesc')}`, action: 'stop' },
-          { key: 'b', label: `📊 ${t('cmd.help.summaryDesc')}`, action: 'summary' },
-          { key: 'l', label: `📋 ${t('cmd.help.listDesc')}`, action: 'list' },
-          { key: '?', label: `❓ ${t('cmd.help.helpDesc')}`, action: 'help' },
+          { key: 'm', label: t('cmd.mark.markPoint'), action: 'mark' },
+          { key: 's', label: t('cmd.help.stopDesc'), action: 'stop' },
         ]
       : [
-          { key: 's', label: `🚀 ${t('cmd.help.startDesc')}`, action: 'start' },
-          { key: 'f', label: `🍅 ${t('cmd.help.focusDesc')}`, action: 'focus' },
-          { key: 'b', label: `📊 ${t('cmd.help.summaryDesc')}`, action: 'summary' },
-          { key: 'l', label: `📋 ${t('cmd.help.listDesc')}`, action: 'list' },
-          { key: '?', label: `❓ ${t('cmd.help.helpDesc')}`, action: 'help' },
+          { key: 's', label: t('cmd.help.startDesc'), action: 'start' },
+          { key: 'f', label: t('cmd.help.focusDesc'), action: 'focus' },
         ];
-
-    const menuContent = menuItems.map(m => `  [${m.key}]  ${m.label}`).join('\n');
-
-    blessed.box({
-      parent: screen,
-      top: menuTop,
-      left: 'center',
-      width: '80%',
-      height: menuItems.length + 1,
-      align: 'center',
-      style: { fg: 'white' },
-      content: menuContent,
-    });
-
-    // Bottom hint
-    blessed.box({
-      parent: screen,
-      bottom: 0,
-      left: 'center',
-      width: '100%',
-      height: 1,
-      align: 'center',
-      style: { fg: 'gray' },
-      content: 'q/Esc to quit',
-    });
-
-    // Handle keys
-    const allKeys = menuItems.map(m => m.key);
-    screen.key([...allKeys], (ch: string) => {
-      const item = menuItems.find(m => m.key === ch);
-      if (item) {
-        destroyScreen(screen);
-        resolve(item.action);
-      }
-    });
-
-    screen.key(['escape', 'q', 'C-c'], () => {
-      destroyScreen(screen);
-      resolve('quit');
-    });
-
-    screen.render();
+    menu.push(
+      { key: 'b', label: t('cmd.help.summaryDesc'), action: 'summary' },
+      { key: 'l', label: t('cmd.help.listDesc'), action: 'list' },
+      { key: '?', label: t('cmd.help.helpDesc'), action: 'help' },
+    );
+    screen.key(
+      menu.map((item) => item.key),
+      (key: string) => {
+        const item = menu.find((item) => item.key === key);
+        if (item) finish(item.action);
+      },
+    );
+    screen.key(['escape', 'q'], () => finish('quit'));
+    screen.key(['C-c'], () => process.emit('SIGINT'));
+    screen.on('resize', () => loop?.refresh());
+    const today = getTodayStr();
+    let streak = data.streak || 0;
+    if (data.lastActiveDate && Date.parse(today) - Date.parse(data.lastActiveDate) > 86400000)
+      streak = 0;
+    loop = startRefreshLoop(
+      (elapsedMs) => {
+        const task = data.current;
+        const primary = task
+          ? [
+              `${t('common.task')}: ${task.task}`,
+              `${t('cmd.mark.elapsed')}: ${formatDuration(Date.now() - Date.parse(task.start))}`,
+            ]
+          : [t('tui.ready')];
+        const menuLines = menu.map((item) => `[${item.key}] ${item.label}`);
+        const height = Number(screen.height);
+        const lines =
+          height < 12
+            ? [...primary, ...menuLines]
+            : [
+                'C A C E  /  T I M E R',
+                '',
+                ...primary,
+                '',
+                ...menuLines,
+                '',
+                `Lv.${scoreToLevel(data.score || 0)}  |  ${data.score || 0} pts  |  ${t('tui.streak', { days: String(streak) })}`,
+              ];
+        surface.render('little_smile', elapsedMs, lines, t('tui.quit'));
+      },
+      fail,
+      getDisplay().animation ? 100 : 1000,
+    );
   });
 }

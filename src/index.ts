@@ -18,6 +18,8 @@ import { cmdDelete } from './commands/delete';
 import { cmdResume } from './commands/resume';
 import { cmdExport } from './commands/export';
 import { cmdPomodoro } from './commands/pomodoro';
+import { cmdMascot } from './commands/mascot';
+import { configureDisplay, ColorMode, paint } from './terminal';
 
 // ============ Safe parseInt ============
 function safeInt(val: string | boolean | string[] | undefined, fallback: number): number {
@@ -31,8 +33,21 @@ function safeString(val: string | boolean | string[] | undefined): string | unde
 }
 
 // ============ Command Router ============
-async function runCommand(command: string, positional: string[], options: Record<string, string | boolean | string[]>): Promise<void> {
+async function runCommand(
+  command: string,
+  positional: string[],
+  options: Record<string, string | boolean | string[]>,
+): Promise<void> {
   switch (command) {
+    case 'mascot':
+      if (positional[0] && positional[0] !== 'preview')
+        throw new Error('Usage: tk mascot preview [--all]');
+      await cmdMascot({
+        all: !!options.all,
+        expression: safeString(options.expression),
+        size: safeString(options.size),
+      });
+      break;
     case 'start':
       await cmdStart(positional[0] || '', {
         tag: options.tag as string | string[] | undefined,
@@ -122,8 +137,7 @@ async function runCommand(command: string, positional: string[], options: Record
       break;
 
     default:
-      console.log(`\x1b[31m${t('error.unknownCommand', { command })}\x1b[0m`);
-      console.log(t('error.useHelp'));
+      throw new Error(t('error.unknownCommand', { command }) + '\n' + t('error.useHelp'));
   }
 }
 
@@ -166,6 +180,28 @@ async function main(): Promise<void> {
 
   const { command, positional, options } = parsed;
 
+  const color = safeString(options.color) ?? 'auto';
+  const theme = safeString(options.theme) ?? 'dark';
+  if (
+    !['auto', 'always', '256', 'never'].includes(color) ||
+    (options.color !== undefined && typeof options.color !== 'string')
+  ) {
+    throw new Error('--color: auto | always | 256 | never');
+  }
+  if (
+    !['dark', 'light'].includes(theme) ||
+    (options.theme !== undefined && typeof options.theme !== 'string')
+  ) {
+    throw new Error('--theme: dark | light');
+  }
+  configureDisplay({
+    animation: !options['no-animation'],
+    tui: !options['no-tui'],
+    ascii: !!options.ascii,
+    color: color as ColorMode,
+    theme: theme as 'dark' | 'light',
+  });
+
   // Resolve locale before any command runs
   const storedData = loadData();
   const locale = resolveLocale(options.lang as string | undefined, storedData.lang);
@@ -179,7 +215,7 @@ async function main(): Promise<void> {
 
   // No command → dashboard (interactive) or help (non-interactive)
   if (command === '' || command === '--help' || command === '-h') {
-    if (command === '' && isInteractiveTerminal()) {
+    if (command === '' && !options.help && isInteractiveTerminal()) {
       const action = await showDashboard();
       await runDashboardAction(action);
       return;
@@ -191,4 +227,7 @@ async function main(): Promise<void> {
   await runCommand(command, positional, parsed.options);
 }
 
-main().catch(console.error);
+main().catch((error) => {
+  console.error(paint(error instanceof Error ? error.message : String(error), 'red'));
+  process.exitCode = 1;
+});

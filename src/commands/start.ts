@@ -1,3 +1,4 @@
+import { paint } from '../terminal';
 import { Session } from '../types';
 import { loadData, saveData } from '../data';
 import { showCaceAnimation, getGreeting } from '../mascot';
@@ -11,7 +12,7 @@ export async function cmdStart(
   const data = loadData();
 
   if (data.current) {
-    console.log(`\x1b[33m⚠ ${t('common.alreadyActive')}\x1b[0m`);
+    console.log(paint(`⚠ ${t('common.alreadyActive')}`, 'yellow'));
     return;
   }
 
@@ -19,11 +20,11 @@ export async function cmdStart(
   let tags: string[] = [];
   const rawTag = options.tag;
   if (Array.isArray(rawTag)) {
-    tags = rawTag.flatMap(tag => tag.split(',').map(s => s.trim())).filter(Boolean);
+    tags = rawTag.flatMap((tag) => tag.split(',').map((s) => s.trim())).filter(Boolean);
   } else if (typeof rawTag === 'string') {
     tags = rawTag
       .split(',')
-      .map(s => s.trim())
+      .map((s) => s.trim())
       .filter(Boolean);
   }
 

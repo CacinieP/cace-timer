@@ -29,6 +29,18 @@ export function resolveLocale(cliFlag?: string, storedLang?: string): Locale {
 // ---- String maps ----
 const strings: Record<Locale, LocaleStrings> = {
   zh: {
+    'tui.ready': '准备好开始了。',
+    'tui.streak': '连续 {days} 天',
+    'tui.quit': 'q/Esc 退出 · Ctrl+C 中断',
+    'tui.cancel': 'q/Esc/Ctrl+C 取消',
+    'tui.oneThing': '一次专注一件事。',
+    'tui.cancelled': '计时已取消；当前记录保留，可用 tk stop 结束。',
+    'mascot.controls': 'q 退出 · n/p 切换表情',
+    'mascot.help': '查看 MINT 的 16 种表情与眨眼动画',
+    'mascot.invalidExpression': '表情名称可选：{names}',
+    'mascot.invalidSize': '尺寸可选：full、compact、tiny',
+    'cmd.help.display': '显示设置（仅本次运行；--ascii 只替换角色字符）：',
+
     // Greetings
     'greeting.lateNight': '夜深了',
     'greeting.morning': '早上好',
@@ -236,6 +248,18 @@ const strings: Record<Locale, LocaleStrings> = {
   },
 
   en: {
+    'tui.ready': 'Ready when you are.',
+    'tui.streak': '{days} day streak',
+    'tui.quit': 'q/Esc quit | Ctrl+C interrupt',
+    'tui.cancel': 'q/Esc/Ctrl+C cancel',
+    'tui.oneThing': 'One thing at a time.',
+    'tui.cancelled': 'Timer cancelled; the active record is kept. Use tk stop to finish it.',
+    'mascot.controls': 'q quit | n/p switch expression',
+    'mascot.help': 'Preview all 16 MINT expressions and blinking',
+    'mascot.invalidExpression': 'Choose an expression: {names}',
+    'mascot.invalidSize': 'Choose a size: full, compact, tiny',
+    'cmd.help.display': 'Display options (this run only; --ascii changes mascot art):',
+
     // Greetings
     'greeting.lateNight': 'Late night',
     'greeting.morning': 'Good morning',
@@ -425,7 +449,7 @@ const strings: Record<Locale, LocaleStrings> = {
     'mascot.encourage3': 'CACE: Hang in there!',
     'mascot.focused': '😤 Focused...',
     'mascot.celebrating': '🎉 Awesome!',
-    'mascot.disappointed': '😴 Don\'t worry, try again tomorrow!',
+    'mascot.disappointed': "😴 Don't worry, try again tomorrow!",
 
     // Status enhancements
     'cmd.status.level': '📊 Lv.{level} | {score} pts',

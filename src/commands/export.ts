@@ -1,3 +1,4 @@
+import { paint } from '../terminal';
 import * as fs from 'fs';
 import { loadData } from '../data';
 import { showCaceSmall } from '../mascot';
@@ -24,7 +25,7 @@ export function cmdExport(options: { format?: string; output?: string }): void {
   } else if (fmt === 'csv') {
     output = toCsv(sessions);
   } else {
-    console.log(`\x1b[33m${t('cmd.export.unsupportedFormat')}\x1b[0m`);
+    console.log(paint(`${t('cmd.export.unsupportedFormat')}`, 'yellow'));
     return;
   }
 
@@ -41,7 +42,7 @@ export function cmdExport(options: { format?: string; output?: string }): void {
 function toCsv(sessions: Session[]): string {
   const header = 'ID,Task,Start,End,Duration,Tags,Marks\n';
   const rows = sessions
-    .map(s => {
+    .map((s) => {
       const duration = s.end
         ? formatDuration(new Date(s.end).getTime() - new Date(s.start).getTime())
         : 'running';
@@ -66,7 +67,7 @@ function toMarkdown(sessions: Session[]): string {
     const duration = s.end
       ? formatDuration(new Date(s.end).getTime() - new Date(s.start).getTime())
       : t('common.running');
-    const tags = s.tags.map(tg => '#' + tg).join(' ');
+    const tags = s.tags.map((tg) => '#' + tg).join(' ');
     md += `| ${i + 1} | ${s.task} | ${formatTime(s.start)} | ${duration} | ${tags} |\n`;
   });
   return md;

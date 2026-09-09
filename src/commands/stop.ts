@@ -1,4 +1,12 @@
-import { loadData, saveData, calculatePoints, scoreToLevel, pointsToNextLevel, updateStreak } from '../data';
+import { paint } from '../terminal';
+import {
+  loadData,
+  saveData,
+  calculatePoints,
+  scoreToLevel,
+  pointsToNextLevel,
+  updateStreak,
+} from '../data';
 import { showCaceSmall } from '../mascot';
 import { formatDuration } from '../utils';
 import { t } from '../i18n';
@@ -9,7 +17,7 @@ export async function cmdStop(options?: { reflection?: string }): Promise<void> 
   const data = loadData();
 
   if (!data.current) {
-    console.log(`\x1b[33m⚠ ${t('cmd.stop.noActive')}\x1b[0m`);
+    console.log(paint(`⚠ ${t('cmd.stop.noActive')}`, 'yellow'));
     return;
   }
 
@@ -74,25 +82,29 @@ export async function cmdStop(options?: { reflection?: string }): Promise<void> 
   // Efficiency display
   if (hasEstimate) {
     let effEmoji = '⭐';
-    let effColor = '\x1b[32m';
+    let effColor: 'green' | 'red' | 'yellow' = 'green';
     if (efficiency < 50) {
       effEmoji = '💀';
-      effColor = '\x1b[31m';
+      effColor = 'red';
     } else if (efficiency < 80) {
       effEmoji = '💪';
-      effColor = '\x1b[33m';
+      effColor = 'yellow';
     } else if (efficiency >= 100) {
       effEmoji = '🏆';
     }
-    console.log(`  ${effEmoji} ${t('cmd.stop.efficiencyScore')}: ${effColor}${efficiency}%\x1b[0m`);
+    console.log(
+      `  ${effEmoji} ${t('cmd.stop.efficiencyScore')}: ${paint(`${efficiency}%`, effColor)}`,
+    );
   } else {
     console.log(`  ⏱  ${t('cmd.stop.noEstimate')}`);
   }
 
   // Points & Level
-  console.log(`  \x1b[33m${t('score.earned', { points: String(points) })}\x1b[0m`);
+  console.log(paint(`  ${t('score.earned', { points: String(points) })}`, 'yellow'));
   console.log(`  ${t('cmd.status.level', { level: String(level), score: String(data.score) })}`);
-  console.log(`  ${t('score.progress', { current: String(levelProgress.current), needed: String(levelProgress.needed) })}`);
+  console.log(
+    `  ${t('score.progress', { current: String(levelProgress.current), needed: String(levelProgress.needed) })}`,
+  );
 
   // Streak
   if (data.streak > 1) {

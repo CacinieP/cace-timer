@@ -1,3 +1,4 @@
+import { paint } from '../terminal';
 import { loadData, saveData } from '../data';
 import { showCaceAnimation, showCaceSmall } from '../mascot';
 import { generateId, formatTime } from '../utils';
@@ -8,7 +9,7 @@ export async function cmdResume(options: { id?: string; last?: boolean }): Promi
   const data = loadData();
 
   if (data.current) {
-    console.log(`\x1b[33m⚠ ${t('common.alreadyActive')}\x1b[0m`);
+    console.log(paint(`⚠ ${t('common.alreadyActive')}`, 'yellow'));
     return;
   }
 
@@ -23,7 +24,7 @@ export async function cmdResume(options: { id?: string; last?: boolean }): Promi
   if (options.last) {
     source = data.history[0];
   } else if (options.id) {
-    source = data.history.find(s => s.id === options.id);
+    source = data.history.find((s) => s.id === options.id);
   }
 
   if (!source) {
