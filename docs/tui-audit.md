@@ -1,5 +1,7 @@
 # cace-timer — TUI 审计
 
+> 历史审计：基于 1.2.4，不代表当前实现。1.3.0 已增加清理逻辑；1.4.0 的角色、动态布局与验证见 `docs/design/mint.md`、`CHANGELOG.md` 和 `scripts/pty-smoke.py`。
+
 > 对内文档。配套阅读 [`docs/ARCHITECTURE.md`](./ARCHITECTURE.md)。
 
 - 仓库: <https://github.com/CacinieP/cace-timer>

@@ -1,130 +1,56 @@
-# cace-timer Architecture
+# cace-timer architecture (1.4.0)
 
-> 对内架构文档。面向贡献者,不写在 npm 包内。
-
-## 模块布局
-
-```
-src/
-├── index.ts          # CLI 入口:参数解析 → locale → 路由(命令 | Dashboard)
-├── types.ts          # 全局类型(Session / Data / etc.)
-├── data.ts           # 持久化(loadData/saveData) + 积分/等级/连续天数算法
-├── parser.ts         # 自研 mini-arg-parser(无依赖)
-├── i18n.ts           # zh/en 双语字典 + 自动检测
-├── utils.ts          # formatDuration / sleep / generateId
-├── mascot.ts         # CACE 字符画(13 行 ASCII + 5 个 mood)
-│
-├── commands/         # 一文件一命令(纯 console 输出)
-│   ├── start.ts  mark.ts  stop.ts  status.ts
-│   ├── list.ts   search.ts  summary.ts  delete.ts
-│   ├── resume.ts  export.ts  sync.ts  help.ts
-│   └── pomodoro.ts      # ← 唯一在交互终端里调 TUI 的命令
-│
-└── tui/              # 交互式 TUI 模块(blessed-based)
-    ├── index.ts          # isInteractiveTerminal(): 判断 TTY
-    ├── dashboard.ts      # 主菜单(Promise<DashboardAction>)
-    ├── countdown.ts      # 番茄钟倒计时(回调式 onDone)
-    └── reflection.ts     # stop 时的反思输入(Promise<{text}>)
-```
-
-## 入口路由
-
-```
-argv → parseArgs
-     → resolveLocale(--lang | stored | 系统)
-     → setLocale
-     │
-     ├ command === '' && isTTY → showDashboard() → runDashboardAction(action)
-     ├ command === '--help'/'-h' → cmdHelp()
-     └ command else → runCommand(command)
-```
-
-`index.ts:182` 是 TTY 决策点——**只有这个无参 + TTY 路径会进 Dashboard**。
-Pomodoro 和 Stop 的 TUI 由各自命令内部判断 `isInteractiveTerminal()`,
-不依赖 `tk` 无参入口。
-
-## TUI 三屏职责
-
-| 屏 | 函数 | 返回 | 触发场景 |
-|----|------|------|----------|
-| Dashboard | `showDashboard(): Promise<DashboardAction>` | `'start'\|'focus'\|'mark'\|'stop'\|'summary'\|'list'\|'help'\|'quit'` | `tk` 无参 + TTY |
-| Countdown | `showCountdown({totalMs,label,mascots,onDone}): void` | 回调,无 Promise | `cmdPomodoro` 的每一轮 |
-| Reflection | `showReflectionInput(): Promise<{text}>` | `{text:string}` | `cmdStop` 在 TTY 且没传 `--reflection` |
-
-调用方降级:
-
-| 函数 | 非 TTY 行为 |
-|------|-----------|
-| Dashboard | 走 `cmdHelp()` |
-| Countdown | 走 `runCountdown(workMin*60000)`(console-only sleep 循环) |
-| Reflection | `session.reflection` 不被赋值 |
-
-## 退出路径汇总(blessed 已知问题点)
-
-每个 TUI 屏都通过 `screen.destroy()` 退出,但**没有**显式还原
-`process.stdin.setRawMode(false)` / cursor,blessed 也不帮你做。
-详见 `tui-audit.md` P0-1。
-
-```
-Dashboard
-  ├─ q / Esc / Ctrl+C  → screen.destroy() → resolve('quit')
-  └─ [s|m|b|l|?|f]     → screen.destroy() → resolve(action)
-
-Countdown
-  ├─ Ctrl+C            → clearInterval + screen.destroy + exit(0)  ← 退出码应是 130
-  ├─ 500ms timer 自然完成 → screen.destroy + onDone() (再下一轮 / cleanup)
-  └─ onDone 抛错        → 无兜底,带 raw mode 退出  ← 见 P0-2
-
-Reflection
-  ├─ Enter             → screen.destroy + resolve({text})
-  ├─ Esc               → screen.destroy + resolve({text:''})
-  └─ Ctrl+C            → screen.destroy + resolve({text:''})
-```
-
-## 数据流
+`src/index.ts` parses CLI/display options, resolves locale, then routes to a
+command or the interactive dashboard. `src/tui/index.ts` disables interactive
+screens for non-TTY streams, `TERM=dumb`, or `--no-tui`.
 
 ```text
-~/.cace-timer.json
-   │
-   └─▶ loadData() ─▶ in-memory Data
-                       │
-                       ├─ 一次性命令(read once, mutate, saveData)
-                       │     e.g. start / mark / stop / delete / resume
-                       │
-                       └─ 循环型命令(pomodoro 每轮都读写)
-                             e.g. cmdPomodoro 在每轮结束时
-                                  set end → unshift to history
-                                  → saveData → 下一轮 / 总结
-                       │
-                       ▼
-                   console 输出 / TUI 渲染
+src/
+  index.ts / parser.ts       command and option routing
+  terminal.ts               display preferences, safe text, cell widths, colour
+  data.ts / types.ts         existing JSON data and score/streak model
+  commands/                 CLI actions; mascot.ts adds the preview entry
+  mascot.ts                 compatibility facade; instant command feedback
+  mascot/assets/mint.ts      art, 16 expressions, fixed sizes and palettes
+  mascot/frames.ts           pure frame data; ANSI or blessed-tag rendering
+  mascot/state.ts            verified state -> expression mapping
+  tui/layout.ts             pure terminal-size layout selection
+  tui/surface.ts             separate artwork and untrusted-text widgets
+  tui/animation.ts           one owned refresh loop with error/dispose paths
+  tui/dashboard.ts          menu and live elapsed-time display
+  tui/countdown.ts           Promise<boolean> timer screen
+  tui/reflection.ts          completion-note input
+  tui/lifecycle.ts           shared screen, cursor, raw-mode and signal cleanup
 ```
 
-读路径:`loadData()` 在每次命令入口调用一次。
-写路径:几乎所有修改都通过同一个 `saveData()` 落盘(`data.ts`)。
+The full art uses a fixed 38×17 canvas under the default terminal-width policy;
+compact and tiny use 22×11 and 8×5. Rendering preserves each row's original
+coordinates. Layout picks side-by-side full art when both columns fit, otherwise
+stacks the largest fitting variant above content, finally hiding art. Footer
+controls always have their own row. User text is clipped by display columns and
+never parsed as blessed tags; terminal control sequences are removed.
 
-唯一的特殊点是 `cmdPomodoro`:**它在循环内部多次 saveData**(每轮结束都更新
-`history` 和 `current`),而不像其它命令那样 read-modify-write 一次。
-所以 pomodoro 崩溃时残留状态可能比其它命令更复杂。
+The surface compares content and dimensions before rendering. A 100ms animation
+clock provides a 200ms blink every 4 seconds; it does not control the task clock.
+`--no-animation` keeps timer updates but produces static art. A preview with no
+changing content does not repaint. Signals, normal screen destruction and
+render failures dispose clocks and handlers.
 
-## 依赖
+`showCountdown()` resolves true only for natural completion and false for q/Esc
+cancellation. Render failures reject. The caller archives a session only after
+true. Ctrl+C/SIGTERM use 130/143 and restore the terminal; the existing active
+session remains on disk after interruption. The command layer owns the single
+completion bell. CLI errors set a nonzero exit status.
 
-| 包 | 用途 | 备注 |
-|----|------|------|
-| `blessed@^0.1.81` | TUI | 上游低活跃,见审计 P3-11 |
-| `@types/blessed` | TS 类型 | |
-| `typescript@^5.3` | 编译 | strict mode |
-| `vitest@^4.1.7` | 测试 | 当前 30 用例,0 覆盖 TUI |
-| `eslint@^10` + `typescript-eslint@^8.60` | 静态检查 | flat config |
+Persistence is still `loadData()` / `saveData()` over `~/.cace-timer.json`.
+This release does not claim concurrent-write safety, pause/AFK accounting,
+process observation, model inference or automatic scheduling. Those require
+the next task/event/storage iteration. Old history stays compatible.
 
-## 构建/发布
+See [MINT design](design/mint.md) for source attribution and visual decisions.
+`docs/tui-audit.md` is a historical audit, not the current behavior reference.
 
-```
-src/*.ts ──tsc──▶ dist/*.js + *.d.ts
-                     │
-                     ├─ bin tk ─────▶ dist/index.js
-                     └─ bin cace-timer ─▶ dist/index.js
-```
-
-`package.json` 的 `prepare: npm run build` 让 `npm install` 自动编译。
-GitHub Actions CI 在 Node 18/20/22 三版本上跑 build + lint + test。
+Validation commands: `npm run build`, `npm run lint`, `npm test`,
+`npm run test:cli`, and `npm run test:pty` (POSIX + Python 3). Both integration
+launchers isolate timer data in temporary directories. CI and publishing run
+the built CLI and PTY checks in addition to unit tests.

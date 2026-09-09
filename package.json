@@ -1,7 +1,7 @@
 {
   "name": "@cacinie/cace-timer",
-  "version": "1.3.2",
-  "description": "A minimal time tracking CLI with cute anime girl mascot",
+  "version": "1.4.0",
+  "description": "Local-first time tracking CLI with a responsive MINT character dashboard",
   "main": "dist/index.js",
   "bin": {
     "tk": "dist/index.js",
@@ -16,7 +16,9 @@
     "lint": "eslint src/",
     "format": "prettier --write src/",
     "prepublishOnly": "npm run build",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "test:cli": "npm run build && node --test scripts/cli-smoke.cjs",
+    "test:pty": "npm run build && python3 scripts/pty-smoke.py"
   },
   "files": [
     "dist",

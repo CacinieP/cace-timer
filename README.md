@@ -12,26 +12,17 @@ npm install -g @cacinie/cace-timer
 ```
 
 ```
-     ╭─╮            ╭─╮
-     ╰─╯            ╰─╯
-       ╭────────────╮
-      ╭┴────────────┴╮
-      │   ╭╮╭╮╭╮╭╮   │
-      │    ●    ●    │
-      │      ▽       │
-      │     ───      │
-      ╰──────┬┬──────╯
-             ││
-       ╭─────┴┴─────╮
-      ╭╯  ╔══════╗  ╰╮
-     o│   ║ CACE ║   │o
-      │   ╚══════╝   │
-      ╰────┬────┬────╯
-           │    │
-           │    │
-           │    │
-          ╭┴╮  ╭┴╮
-          ╰─╯  ╰─╯
+           _,
+          //
+       .-'/`--.
+      / //\     \
+     ///  \ h*   \
+    (|:(O')-(O'):|)
+     |: (// //) :|
+     \:  \ v /  :/
+      '-  \_/  -'
+        / >o< \
+        '-----'
        CACE TIMER
 ```
 
@@ -216,15 +207,37 @@ Consecutive days with at least one completed task. Break a day and the streak re
 
 ## CACE Mascot
 
-CACE has 5 moods that change based on context:
+CACE uses **MINT**, a teal bob-haired girl with delicate round glasses, a slim,
+rounded jaw and 16 expressions. The dashboard and countdown blink gently;
+one-shot commands print immediately. The artwork automatically steps down from
+full to compact, tiny or text-only as the terminal shrinks.
 
-| Mood | Eyes | Mouth | When |
-|------|------|-------|------|
-| Normal | ● ● | ─── | Default display |
-| Happy | ★ ★ | ◡◡◡ | Task completed |
-| Focused | ◆ ◆ | ▬▬▬ | Pomodoro / active task |
-| Celebrating | ◉ ◉ | ▽△▽ | Points earned + arms up |
-| Sleepy | ─ ─ | ～～ | No active task |
+```bash
+tk mascot preview                         # live preview; n/p selects an expression
+tk mascot preview --all --no-tui           # export all 16 expressions
+tk mascot preview --size compact --ascii   # ASCII art without Unicode glyphs
+tk --no-animation                          # static mascot, live timer
+tk --no-tui                                # plain command output
+tk --color never                           # no foreground colours
+tk --theme light                           # light-terminal palette
+```
+
+`--ascii` changes mascot art; task names and translated UI text keep their original
+characters. Colour modes are `auto`, `always` (truecolor for plain output), `256`
+and `never`. Auto mode respects `NO_COLOR`, `TERM=dumb` and redirected output.
+The blessed TUI maps colours to its supported terminal palette. No terminal
+background, shell configuration or Python runtime is required by the application.
+Preview with `--all` or an explicit `--size` is a static export. Add
+`--expression little_smile` (or another expression key) to select one portrait.
+
+Cancel a countdown with q/Esc/Ctrl+C. Cancellation exits 130 and retains the
+active record; use `tk stop` to finish it. Rendering failures exit 1 without
+adding a completed session. SIGTERM exits 143. Normal q/Esc in the dashboard or
+preview exits 0. Normal timer completion rings once in a supported TTY.
+
+For contributors: `npm test`, `npm run test:cli`, and, on POSIX with Python 3,
+`npm run test:pty`. Tests use temporary timer files. See
+[the design and reference](docs/design/mint.md).
 
 ## Data
 
@@ -462,15 +475,27 @@ tk stop
 
 ## CACE 吉祥物
 
-CACE 有 5 种心情，根据场景变化：
+CACE 采用 **MINT 蓝绿短 bob 女孩**：细圆框、大眼、平顺内收的下颌与小圆下巴，
+无鼻子、无手部，共 16 种表情。仪表盘与番茄钟自然眨眼；开始/恢复等一次性命令即时输出。
+终端缩小时自动切换完整、紧凑、迷你或纯文字布局。
 
-| 心情 | 眼睛 | 嘴巴 | 时机 |
-|------|------|------|------|
-| 正常 | ● ● | ─── | 默认显示 |
-| 开心 | ★ ★ | ◡◡◡ | 任务完成 |
-| 专注 | ◆ ◆ | ▬▬▬ | 番茄钟 / 活跃任务 |
-| 庆祝 | ◉ ◉ | ▽△▽ | 获得积分 + 举手 |
-| 困了 | ─ ─ | ～～ | 无活跃任务 |
+```bash
+tk mascot preview                         # 动态预览，n/p 切换表情
+tk mascot preview --all --no-tui           # 静态输出 16 种表情
+tk mascot preview --size compact --ascii   # 纯 ASCII 角色
+tk --no-animation                          # 关闭动画，计时继续
+tk --no-tui                                # 普通命令输出
+tk --color never                           # 无颜色
+tk --theme light                           # 浅色终端配色
+```
+
+`--ascii` 只替换角色字符，任务名和中文文案保留原文。颜色支持 `auto|always|256|never`；
+自动模式尊重 `NO_COLOR`、`TERM=dumb` 和输出重定向。TUI 颜色适配 blessed 支持的终端调色板。
+应用不需要 Python，也不修改终端背景或 shell 配置。
+
+番茄钟中 q/Esc/Ctrl+C 取消并返回 130，当前记录保留，可用 `tk stop` 结束；
+渲染错误返回 1，不写入已完成历史；SIGTERM 返回 143。仪表盘和预览中 q/Esc 正常退出。
+`--all` 或显式 `--size` 为静态导出，可加 `--expression <表情名称>` 指定单张。
 
 ## 数据
 
